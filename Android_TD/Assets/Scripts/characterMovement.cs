@@ -8,13 +8,13 @@ public class characterMovement : MonoBehaviour {
     //destination point
     private Vector3 endPoint;
     //Vertical position of the gameobject
-    private float yAxis;
+    private float zAxis;
     //Movement speed of gameObject
     public float duration = 50.0f;
 
 	// Use this for initialization
 	void Start () {
-        yAxis = gameObject.transform.position.y;
+        zAxis = gameObject.transform.position.z;
 	}
 	
 	// Update is called once per frame
@@ -32,7 +32,7 @@ public class characterMovement : MonoBehaviour {
             {
                 flag = true;
                 endPoint = hit.point;
-                endPoint.y = yAxis;
+                endPoint.z = zAxis;
                 print("endPoint");
             }
         }

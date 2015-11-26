@@ -1,3 +1,12 @@
 Android_TD/Library/
 Android_TD/Temp/
+_UpgradeReport_Files/
+
 Android_TD/test.apk
+
+*.suo
+*.sln
+*.csproj
+*.userprefs
+
+UpgradeLog.*

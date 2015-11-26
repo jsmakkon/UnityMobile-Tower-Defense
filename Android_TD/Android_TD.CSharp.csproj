@@ -74,6 +74,7 @@
     <Compile Include="Assets\Reporter\ReporterMessageReceiver.cs" />
     <Compile Include="Assets\Reporter\Test\Rotate.cs" />
     <Compile Include="Assets\Reporter\Test\TestReporter.cs" />
+    <Compile Include="Assets\Scripts\CameraButtons.cs" />
     <Compile Include="Assets\Scripts\characterMovement.cs" />
   </ItemGroup>
   <ItemGroup>
