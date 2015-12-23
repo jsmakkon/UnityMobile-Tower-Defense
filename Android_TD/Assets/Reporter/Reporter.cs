@@ -5,7 +5,7 @@ using UnityEngine;
 //using System;
 using System.Collections;
 using System.Collections.Generic;
-
+#pragma warning disable 0618
 
 
 [System.Serializable]
@@ -2057,5 +2057,5 @@ public class Reporter : MonoBehaviour {
 		yield break;
 	}
 }
-
+#pragma warning restore 0618
 

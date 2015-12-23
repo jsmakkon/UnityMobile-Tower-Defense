@@ -5,24 +5,28 @@ using System.Collections.Generic;
 public class MapRow : MonoBehaviour {
 
 	public int rowID;
-	public bool offSetRow = false;
+	public bool offSetRow;
 
 	public GameObject hexaPrefab;
 
-	private List<GameObject> hexList;
+	public List<GameObject> hexList;
 
-	void Start() {
+	void Awake() {
 		hexList = new List<GameObject> ();
 	}
 
 	public void AddHex(GameObject parent, int id, float xPos,float yPos,float zPos) {
 		Vector3 position = new Vector3(xPos,yPos,zPos);
 		Quaternion rot = this.transform.rotation;
-		rot.eulerAngles.Set(0,180,0);
+		rot.Set(0,180,0,0);
 		GameObject hexa = (GameObject)Instantiate (hexaPrefab, position, rot);
+		Debug.Log ("5");
 		hexa.transform.SetParent (parent.transform);
+		hexa.transform.localPosition = position;
 		hexa.GetComponent<MapHexa> ().hexaID = id;
+		Debug.Log ("6");
 		hexList.Add (hexa);
+		Debug.Log ("7");
 	}
 
 	public GameObject getHexagon(int id) {
