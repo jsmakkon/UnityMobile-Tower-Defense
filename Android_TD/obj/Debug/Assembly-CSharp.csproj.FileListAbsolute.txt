@@ -18,3 +18,4 @@ D:\Dokumentit\Koodit\Android_TD\Android_TD\Temp\bin\Debug\UnityEngine.UI.xml
 D:\Dokumentit\Koodit\Android_TD\Android_TD\Temp\bin\Debug\UnityEngine.Networking.xml
 D:\Dokumentit\Koodit\Android_TD\Android_TD\obj\Debug\Assembly-CSharp.dll
 D:\Dokumentit\Koodit\Android_TD\Android_TD\obj\Debug\Assembly-CSharp.pdb
+D:\Dokumentit\Koodit\Android_TD\Android_TD\obj\Debug\Assembly-CSharp.csprojResolveAssemblyReference.cache
