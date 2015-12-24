@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class MapHexa : MonoBehaviour {
 
 	public enum HexDir{W, NW, NE, E, SE, SW};
-	[HideInInspector] 
+	//[HideInInspector] 
 	public int hexaID;
+
+	public List<Material> materials;
 
 	public int getParentRowId() {
 		return transform.GetComponentInParent<MapRow> ().rowID;
@@ -17,17 +20,28 @@ public class MapHexa : MonoBehaviour {
 	public GameObject getNeighbour(HexDir direction) {
 		switch(direction) {
 		case HexDir.E:
-			return transform.GetComponentInParent<MapRow> ().getHexagon (hexaID - 1);
-		case HexDir.W:
 			return transform.GetComponentInParent<MapRow> ().getHexagon (hexaID + 1);
+		case HexDir.W:
+			return transform.GetComponentInParent<MapRow> ().getHexagon (hexaID - 1);
 		case HexDir.NW:
 			return getNWNeighbour ();
 		case HexDir.NE:
-			
+			return getNENeighbour ();
+		case HexDir.SE:
+			return getSENeighbour ();
+		case HexDir.SW:
+			return getSWNeighbour ();
 		default:
 			break;
 		}
 		return null;
+	}
+
+
+
+	public void getIds(ref int hexId, ref int rowId) {
+		hexId = hexaID;
+		rowId = getParentRowId ();
 	}
 
 	private GameObject getNWNeighbour() {

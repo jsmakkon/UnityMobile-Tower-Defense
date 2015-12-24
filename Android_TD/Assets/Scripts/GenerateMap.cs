@@ -34,19 +34,16 @@ public class GenerateMap : MonoBehaviour {
 				position = new Vector3 (rowOffset, i * rowH, 0.0f);
 				offsetRowFlag = true; // Offset true if moving the row to the right
 			}
-			Debug.Log ("1");
 			// Create row, with id 0,1,2,3... rows -1;
 			GameObject row = (GameObject)Instantiate (rowPrefab, position, this.transform.rotation);
+			row.name = "Row" + rowIDs;
 			row.transform.SetParent (this.transform);
 			row.GetComponent<MapRow> ().rowID = rowIDs;
 			row.GetComponent<MapRow> ().offSetRow = offsetRowFlag;
 			rowIDs++;
-			Debug.Log ("2");
 			// Add hexagons with id 0,1,2,3,4... column - 1.
 			for (int a = 0; a < columns; a++) {
-				Debug.Log ("3");
 				row.GetComponent<MapRow> ().AddHex (row, a, a*wDist,0,0);
-				Debug.Log ("4");
 			}
 			rowList.Add (row);
 			Debug.Log ("Finishing");
@@ -54,7 +51,8 @@ public class GenerateMap : MonoBehaviour {
 	}
 
 	public GameObject getRow(int id) {
-		if (id >= rowList.Count)
+		//Debug.Log ("getRow id: "+id+ " and count is " + rowList.Count);
+		if (id >= rowList.Count || id < 0)
 			return null;
 		if (rowList [id].GetComponent<MapRow> ().rowID == id) {
 			return rowList [id];

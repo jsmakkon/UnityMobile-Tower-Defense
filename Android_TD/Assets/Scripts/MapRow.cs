@@ -20,17 +20,16 @@ public class MapRow : MonoBehaviour {
 		Quaternion rot = this.transform.rotation;
 		rot.Set(0,180,0,0);
 		GameObject hexa = (GameObject)Instantiate (hexaPrefab, position, rot);
-		Debug.Log ("5");
 		hexa.transform.SetParent (parent.transform);
 		hexa.transform.localPosition = position;
+		hexa.name = "Hexa" + id;
 		hexa.GetComponent<MapHexa> ().hexaID = id;
-		Debug.Log ("6");
 		hexList.Add (hexa);
-		Debug.Log ("7");
 	}
 
 	public GameObject getHexagon(int id) {
-		if (id >= hexList.Count)
+		//Debug.Log ("getHexagon with id: "+ id+" hexlist count "+hexList.Count);
+		if (id > hexList.Count || id < 0)
 			return null;
 		if (hexList [id].GetComponent<MapHexa> ().hexaID == id) {
 			return hexList [id];
