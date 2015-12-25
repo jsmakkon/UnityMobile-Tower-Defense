@@ -5,6 +5,12 @@ using System.Collections.Generic;
 public class MapHexa : MonoBehaviour {
 
 	public enum HexDir{W, NW, NE, E, SE, SW};
+
+	public struct Coordinate {
+		public int rowId;
+		public int hexaId;
+	}
+
 	//[HideInInspector] 
 	public int hexaID;
 
@@ -37,7 +43,10 @@ public class MapHexa : MonoBehaviour {
 		return null;
 	}
 
-
+	public void getIds(ref Coordinate coord) {
+		coord.hexaId = hexaID;
+		coord.rowId = getParentRowId ();
+	}
 
 	public void getIds(ref int hexId, ref int rowId) {
 		hexId = hexaID;

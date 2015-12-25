@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+
 public class GenerateMap : MonoBehaviour {
+
+
 
 	static int rowIDs = 0;
 
@@ -10,6 +13,8 @@ public class GenerateMap : MonoBehaviour {
 	public static int rows = 18;
 	public static int columns = 25;
 
+	public int numOfRoadStarts = 3;
+
 	private float wDist = 1.73205f;
 
 	private float rowH = -1.5f;
@@ -17,10 +22,31 @@ public class GenerateMap : MonoBehaviour {
 
 	public List<GameObject> rowList;
 
-	// Use this for initialization
+	public List<MapHexa.Coordinate> roadStarts;
+	public RoadEnd roadEnd = new RoadEnd();
+
+
+	public List<List<MapHexa.Coordinate> > roads;
+	// Road generator stuff
+	public int roadMinLength = 10;
+
+
+
 	void Start () {
+		// Inits
 		rowList = new List<GameObject> ();
+		roadStarts = new List<MapHexa.Coordinate> ();
 		rowIDs = 0; // Reset for possible new map
+
+		// TEMP: roadend init
+		roadEnd.endPos = RoadEnd.EndPositions.East;
+		roadEnd.endCoordinate.hexaId = columns-1;
+		roadEnd.endCoordinate.rowId = rows - 1;
+		GenerateMapBlocks();
+		GenerateRoads ();
+	}
+
+	private void GenerateMapBlocks() {
 		Vector3 position;
 		bool offsetRowFlag;
 		// Create rows and hexagons
@@ -65,5 +91,30 @@ public class GenerateMap : MonoBehaviour {
 		}
 		Debug.LogError ("getRow failed to find row with id: "+ id);
 		return null;
+	}
+
+	private void GenerateRoads() {
+		// Generate road starts
+		MapHexa.Coordinate firstCoords;
+		switch (roadEnd.endPos) {
+		case RoadEnd.EndPositions.East:
+			firstCoords.hexaId = 0;
+			firstCoords.rowId = Random.Range (1, rows - 1);
+			break;
+		case RoadEnd.EndPositions.West:
+			firstCoords.hexaId = columns;
+			firstCoords.rowId = Random.Range (1, rows - 1);
+			break;
+		default:
+			firstCoords.hexaId = 0;
+			firstCoords.rowId = Random.Range (1, rows - 1);
+			roadEnd.endCoordinate.hexaId = columns - 1;
+			roadEnd.endCoordinate.rowId = rows - 1;
+			break;
+		}
+
+		// Generate first road
+
+		// Generate rest of the roads
 	}
 }
