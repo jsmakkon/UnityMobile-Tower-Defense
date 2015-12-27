@@ -2,9 +2,14 @@
 using System.Collections;
 
 public class TouchDetection : MonoBehaviour {
-
+	public GameObject character;
+	public GameObject cameraObject;
 	//private bool flag = false;
 	float touchTime = 0;
+	//Change the time touch is defined as a tap
+	public float tapTime = 0.5f;
+
+	Vector3 startDragPos;
 
 	// Use this for initialization
 	void Start () {
@@ -31,19 +36,26 @@ public class TouchDetection : MonoBehaviour {
 					case TouchPhase.Began:
 						//Check when the touch began
 						touchTime = Time.time;
+						startDragPos = touch.position;
 						break;
 					case TouchPhase.Ended:
 						// This checks if touch was a TAP
-						if (Time.time - touchTime <= 0.5)
+						if (Time.time - touchTime <= tapTime)
 						{
 							Debug.Log("tap");
-							GameObject.Find ("Character").GetComponent<characterMovement> ().setFlagTrue ();
+							character.GetComponent<CharacterMovement> ().setFlagTrue ();
 						}
 						// This checks if touch was a LONG PRESS
 						else
 						{
 							Debug.Log("Long press");
 						}
+						break;
+					case TouchPhase.Moved:
+
+						//Debug.Log ("Inside TouchPhase.Moved");
+						cameraObject.GetComponent<DragCamera> ().setDragOrigin (startDragPos);
+						cameraObject.GetComponent<DragCamera> ().setCameraDragTrue ();
 						break;
 
 					}

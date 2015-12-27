@@ -23,7 +23,7 @@ public class GenerateMap : MonoBehaviour {
 	public List<GameObject> rowList;
 
 	public List<MapHexa.Coordinate> roadStarts;
-	public RoadEnd roadEnd = new RoadEnd();
+	private RoadEnd roadEnd;
 
 
 	public List<List<MapHexa.Coordinate> > roads;
@@ -39,6 +39,7 @@ public class GenerateMap : MonoBehaviour {
 		rowIDs = 0; // Reset for possible new map
 
 		// TEMP: roadend init
+		roadEnd = GameObject.Find("GameController").GetComponent<RoadEnd>();
 		roadEnd.endPos = RoadEnd.EndPositions.East;
 		roadEnd.endCoordinate.hexaId = columns-1;
 		roadEnd.endCoordinate.rowId = rows - 1;
