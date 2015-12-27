@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class characterMovement : MonoBehaviour {
+public class CharacterMovement : MonoBehaviour {
 
     //Flag to check if user has tapped the screen
     private bool flag = false;
