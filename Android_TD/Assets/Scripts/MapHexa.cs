@@ -108,4 +108,8 @@ public class MapHexa : MonoBehaviour {
 			hexid = hexaID;
 		return rowObject.GetComponent<MapRow> ().getHexagon(hexid);
 	}
+
+	public void setTexture(int id) {
+		GetComponent<Renderer> ().sharedMaterial = materials[id];
+	}
 }

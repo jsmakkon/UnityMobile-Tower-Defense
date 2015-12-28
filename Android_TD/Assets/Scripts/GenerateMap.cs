@@ -4,11 +4,10 @@ using System.Collections.Generic;
 
 public class GenerateMap : MonoBehaviour {
 
-
-
 	static int rowIDs = 0;
 
 	public GameObject rowPrefab;
+	public GameObject gameController;
 
 	public static int rows = 18;
 	public static int columns = 25;
@@ -20,36 +19,37 @@ public class GenerateMap : MonoBehaviour {
 	private float rowH = -1.5f;
 	private float rowOffset = 0.866025f;
 
-	public List<GameObject> rowList;
-
-	public List<MapHexa.Coordinate> roadStarts;
-	private RoadEnd roadEnd;
-
-
-	public List<List<MapHexa.Coordinate> > roads;
 	// Road generator stuff
 	public int roadMinLength = 10;
 
-
-
 	void Start () {
+		
 		// Inits
-		rowList = new List<GameObject> ();
-		roadStarts = new List<MapHexa.Coordinate> ();
 		rowIDs = 0; // Reset for possible new map
 
-		// TEMP: roadend init
-		roadEnd = GameObject.Find("GameController").GetComponent<RoadEnd>();
-		roadEnd.endPos = RoadEnd.EndPositions.East;
-		roadEnd.endCoordinate.hexaId = columns-1;
-		roadEnd.endCoordinate.rowId = rows - 1;
 		GenerateMapBlocks();
+
+
+		// TEMP: roadend init
+		//Debug.Log("generate inits");
+		MapData.RoadEnd roadEnd = null;
+		gameController.GetComponent<MapData>().getRoadEnd(ref roadEnd);
+		roadEnd.setEndPos( MapData.RoadEnd.EndPositions.East);
+		MapHexa.Coordinate coords;
+		coords.hexaId = columns-2;
+		coords.rowId = rows - 2;
+		roadEnd.setCoords (coords);
+
 		GenerateRoads ();
+
 	}
 
 	private void GenerateMapBlocks() {
 		Vector3 position;
 		bool offsetRowFlag;
+		List<GameObject> rowList= null;
+		gameController.GetComponent<MapData>().getRowList(ref rowList);
+
 		// Create rows and hexagons
 		for (int i = 0; i < rows; i++){
 			Debug.Log ("Starting row adding");
@@ -79,6 +79,9 @@ public class GenerateMap : MonoBehaviour {
 
 	public GameObject getRow(int id) {
 		//Debug.Log ("getRow id: "+id+ " and count is " + rowList.Count);
+		List<GameObject> rowList= null;
+		gameController.GetComponent<MapData>().getRowList(ref rowList);
+
 		if (id >= rowList.Count || id < 0)
 			return null;
 		if (rowList [id].GetComponent<MapRow> ().rowID == id) {
@@ -97,20 +100,26 @@ public class GenerateMap : MonoBehaviour {
 	private void GenerateRoads() {
 		// Generate road starts
 		MapHexa.Coordinate firstCoords;
-		switch (roadEnd.endPos) {
-		case RoadEnd.EndPositions.East:
+		MapData.RoadEnd roadEnd= null;
+		gameController.GetComponent<MapData>().getRoadEnd(ref roadEnd);
+
+		switch (roadEnd.getEndPos()) {
+		case MapData.RoadEnd.EndPositions.East:
 			firstCoords.hexaId = 0;
 			firstCoords.rowId = Random.Range (1, rows - 1);
 			break;
-		case RoadEnd.EndPositions.West:
+		case MapData.RoadEnd.EndPositions.West:
 			firstCoords.hexaId = columns;
 			firstCoords.rowId = Random.Range (1, rows - 1);
 			break;
 		default:
+			Debug.LogWarning ("RoadEnd endpos default proc: value is " + roadEnd.getEndPos());
 			firstCoords.hexaId = 0;
 			firstCoords.rowId = Random.Range (1, rows - 1);
-			roadEnd.endCoordinate.hexaId = columns - 1;
-			roadEnd.endCoordinate.rowId = rows - 1;
+			MapHexa.Coordinate coords;
+			coords.hexaId = columns-2;
+			coords.rowId = rows - 2;
+			roadEnd.setCoords (coords);
 			break;
 		}
 
