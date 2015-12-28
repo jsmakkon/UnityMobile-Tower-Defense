@@ -9,6 +9,8 @@ public class GenerateMap : MonoBehaviour {
 	public GameObject rowPrefab;
 	public GameObject gameController;
 
+	private MapData mapData;
+
 	public static int rows = 18;
 	public static int columns = 25;
 
@@ -22,6 +24,9 @@ public class GenerateMap : MonoBehaviour {
 	// Road generator stuff
 	public int roadMinLength = 10;
 
+	void Awake() {
+		mapData = gameController.GetComponent<MapData> ();
+	}
 	void Start () {
 		
 		// Inits
@@ -32,8 +37,8 @@ public class GenerateMap : MonoBehaviour {
 
 		// TEMP: roadend init
 		//Debug.Log("generate inits");
-		MapData.RoadEnd roadEnd = null;
-		gameController.GetComponent<MapData>().getRoadEnd(ref roadEnd);
+		MapData.RoadEnd roadEnd = gameController.GetComponent<MapData>().getRoadEnd();
+
 		roadEnd.setEndPos( MapData.RoadEnd.EndPositions.East);
 		MapHexa.Coordinate coords;
 		coords.hexaId = columns-2;
@@ -47,8 +52,7 @@ public class GenerateMap : MonoBehaviour {
 	private void GenerateMapBlocks() {
 		Vector3 position;
 		bool offsetRowFlag;
-		List<GameObject> rowList= null;
-		gameController.GetComponent<MapData>().getRowList(ref rowList);
+		List<GameObject> rowList= gameController.GetComponent<MapData>().getRowList();
 
 		// Create rows and hexagons
 		for (int i = 0; i < rows; i++){
@@ -77,31 +81,13 @@ public class GenerateMap : MonoBehaviour {
 		}
 	}
 
-	public GameObject getRow(int id) {
-		//Debug.Log ("getRow id: "+id+ " and count is " + rowList.Count);
-		List<GameObject> rowList= null;
-		gameController.GetComponent<MapData>().getRowList(ref rowList);
 
-		if (id >= rowList.Count || id < 0)
-			return null;
-		if (rowList [id].GetComponent<MapRow> ().rowID == id) {
-			return rowList [id];
-		} else {
-			Debug.LogWarning ("Row ids messed. Looking for id: "+ id);
-			for (int i = 0; i < rowList.Count; i++) {
-				if (rowList [i].GetComponent<MapRow> ().rowID == id) 
-					return rowList[i];
-			}
-		}
-		Debug.LogError ("getRow failed to find row with id: "+ id);
-		return null;
-	}
 
 	private void GenerateRoads() {
+		MapData.RoadEnd roadEnd=mapData.getRoadEnd();
+
 		// Generate road starts
 		MapHexa.Coordinate firstCoords;
-		MapData.RoadEnd roadEnd= null;
-		gameController.GetComponent<MapData>().getRoadEnd(ref roadEnd);
 
 		switch (roadEnd.getEndPos()) {
 		case MapData.RoadEnd.EndPositions.East:
@@ -123,8 +109,134 @@ public class GenerateMap : MonoBehaviour {
 			break;
 		}
 
+		mapData.getHexa(firstCoords).GetComponent<MapHexa>().GetComponent<MapHexa>().setType(MapHexa.HexType.Road);
+
+		Roads.Road firstRoad = new Roads.Road (0); // First road with id 
+		mapData.getRoads().addRoad(firstRoad); // TODO: move to constructor
 		// Generate first road
+		/*int ret = buildRoad(ref firstRoad, mapData.getHexa(firstCoords).GetComponent<MapHexa>());
+		if (ret == 0) {
+			Debug.Log ("Road build fail");
+		} else {
+			Debug.Log ("Road build success");
+		}*/
+
 
 		// Generate rest of the roads
 	}
+	// Builds first road from start to end.
+	private int buildRoad(ref Roads.Road road,MapHexa currentRoadBlock) {
+		//MapHexa.Coordinate currentCoords = currentRoadBlock.getCoords ();
+		//bool foundNext = false;
+		List <MapHexa.HexDir> possibleDirections = initDirections ();
+		// Randomize next direction
+		for (int i = 5; i >= 0; i--) {
+			// Randomize direction
+			MapHexa.HexDir dir = possibleDirections [Random.Range (0, i)];
+			possibleDirections.Remove (dir);
+			// Take hexa from that direction
+			if (currentRoadBlock.getNeighbour (dir) == null) continue;
+			MapHexa hexa = currentRoadBlock.getNeighbour (dir).GetComponent<MapHexa>();
+			// Check if we have reached end
+			if (hexa.getHexType () == MapHexa.HexType.End) {
+				return 1;
+			}
+			// Check if we can go there
+			if (isHexaAtTheEdge(hexa.getCoords()) || isHexaNearThisRoad(hexa.getCoords(),road.roadId,getCounterDir(dir)) ||
+				isHexaInThisRoad(hexa.getCoords(),road.roadId) ){
+				// Continue to next direction if we can't
+					continue;
+			}
+
+			// Call next roadblock
+			int ret = buildRoad(ref road, hexa);
+			// Check if we have been successful reaching the end, set hexa to road
+			if (ret == 1) {
+				hexa.setType (MapHexa.HexType.Road);
+				return 1;
+			}
+			// Else we have to continue if we can reach the end from here
+		}
+		// If we fail at this point, return 0 to fall back one hex
+		return 0;
+	}
+
+	private MapHexa.HexDir getCounterDir(MapHexa.HexDir hexdir) {
+		if (hexdir == MapHexa.HexDir.E)
+			return MapHexa.HexDir.W;
+		if (hexdir == MapHexa.HexDir.W)
+			return MapHexa.HexDir.E;
+		if (hexdir == MapHexa.HexDir.NW)
+			return MapHexa.HexDir.SE;
+		if (hexdir == MapHexa.HexDir.SW)
+			return MapHexa.HexDir.NE;
+		if (hexdir == MapHexa.HexDir.NE)
+			return MapHexa.HexDir.SW;
+		if (hexdir == MapHexa.HexDir.SE)
+			return MapHexa.HexDir.NW;
+
+		Debug.Log ("Error at getCounterdir");
+		return MapHexa.HexDir.E;
+
+	}
+
+
+	public bool isHexaAtTheEdge(MapHexa.Coordinate hexCoords) {
+		if (hexCoords.hexaId == 0 || hexCoords.hexaId == columns - 1 || hexCoords.rowId == 0 || hexCoords.rowId == rows - 1)
+			return true;
+		else
+			return false;
+	}
+	//Check if nearby hexa is near this road, excluding the direction we are coming from
+	public bool isHexaNearThisRoad(MapHexa.Coordinate hexCoords, int roadId, MapHexa.HexDir exclude) {
+		List <MapHexa.HexDir> directions = initDirections ();
+		directions.Remove (exclude);
+		MapHexa hexa = mapData.getHexa (hexCoords).GetComponent<MapHexa>();
+		//bool ret = false;
+		// Loop all directions
+		for (int i = 0; i < directions.Count; i++) {
+			// Take the nearby hex
+			MapHexa nearby = hexa.getNeighbour (directions [i]).GetComponent<MapHexa>();
+			// Continue if its no road
+			if (nearby.getHexType () != MapHexa.HexType.Road)
+				continue;
+			// Its a road, now check if it belongs to this road
+			else {
+				Roads.Road road = mapData.getRoads().getRoad (roadId);
+				for (int a = 0; a < road.roadBlocks.Count; a++) {
+					if (road.roadBlocks [a].coord.hexaId == hexCoords.hexaId && road.roadBlocks [a].coord.rowId == hexCoords.rowId)
+						return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public bool isHexaInThisRoad(MapHexa.Coordinate hexCoords, int roadId) {
+		if (mapData.getHexa (hexCoords).GetComponent<MapHexa> ().getHexType () != MapHexa.HexType.Road)
+			return false;
+		else {
+			Roads.Road road = mapData.getRoads().getRoad (roadId);
+			for (int i = 0; i < road.roadBlocks.Count; i++){
+				if (road.roadBlocks [i].coord.rowId == hexCoords.rowId && road.roadBlocks [i].coord.hexaId == hexCoords.hexaId) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
+	private List<MapHexa.HexDir> initDirections() {
+		List<MapHexa.HexDir> directions = new List<MapHexa.HexDir> ();
+		directions.Add (MapHexa.HexDir.E);
+		directions.Add (MapHexa.HexDir.NW);
+		directions.Add (MapHexa.HexDir.NE);
+		directions.Add (MapHexa.HexDir.W);
+		directions.Add (MapHexa.HexDir.SW);
+		directions.Add (MapHexa.HexDir.SE);
+		return directions;
+	}
+
+
 }
