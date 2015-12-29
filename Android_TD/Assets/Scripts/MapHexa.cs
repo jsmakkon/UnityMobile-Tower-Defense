@@ -18,6 +18,8 @@ public class MapHexa : MonoBehaviour {
 	public List<Material> materials;
 	private HexType hexType;
 	public GameObject gameController;
+	public Roads.Road.RoadBlock roadBlock = null; // For debug
+	public int rbid;
 
 	void Awake() {
 		hexType = HexType.Grass;

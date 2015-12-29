@@ -15,10 +15,12 @@ public class Roads {
 		{
 			public MapHexa.Coordinate coord;
 			public MapHexa.HexDir roadDirection;
+			public int blockId;
 
-			RoadBlock(MapHexa.Coordinate coords, MapHexa.HexDir dir) {
+			public RoadBlock(MapHexa.Coordinate coords, int id) {
 				coord = coords;
-				roadDirection = dir;
+				//roadDirection = dir;
+				blockId=id;
 			}
 		}
 
@@ -31,9 +33,11 @@ public class Roads {
 			if (block == null)
 				return;
 			roadBlocks.Add (block);
+			//GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (block.coord).GetComponent<MapHexa> ().roadBlock = block;
+			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (block.coord).GetComponent<MapHexa> ().rbid = block.blockId;
 			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (block.coord).GetComponent<MapHexa>().setType(MapHexa.HexType.Road);
 		}
-
+		/*
 		public void deleteRoadBlock(MapHexa.Coordinate coord) {
 			for (int i = roadBlocks.Count - 1; i >= 0; i--) {
 				if (coord.rowId == roadBlocks [i].coord.rowId && coord.hexaId == roadBlocks [i].coord.hexaId) {
@@ -42,6 +46,29 @@ public class Roads {
 				}
 			}
 			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (coord).GetComponent<MapHexa>().setType(MapHexa.HexType.Grass);
+		}*/
+
+		public void deleteRoadBlock(int blockid) {
+			//Debug.Log ("Delete block with id "+blockid);
+			for (int i = roadBlocks.Count - 1; i >= 0; i--) {
+				if (roadBlocks [i].blockId ==blockid) {
+					//Debug.Log ("Removing blockid "+ blockid + " from "+ roadBlocks [i].coord.rowId+" "+roadBlocks [i].coord.hexaId);
+					//GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (roadBlocks [i].coord).GetComponent<MapHexa> ().roadBlock = null;
+					GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (roadBlocks [i].coord).GetComponent<MapHexa> ().rbid = 0;
+					GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (roadBlocks [i].coord).GetComponent<MapHexa>().setType(MapHexa.HexType.Grass);
+					roadBlocks.RemoveAt (i);
+					break;
+				}
+			}
+			//Debug.Log ("Failed to remove block "+ blockid);
+		}
+
+		public RoadBlock getRoadBlock(int id) {
+			for (int i = 0; i < roadBlocks.Count; i++) {
+				if (roadBlocks [i].blockId == id)
+					return roadBlocks [i];
+			}
+			return null;
 		}
 	}
 
