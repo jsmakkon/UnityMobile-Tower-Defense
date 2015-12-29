@@ -16,6 +16,7 @@ public class Roads {
 			public MapHexa.Coordinate coord;
 			public MapHexa.HexDir roadDirection;
 			public int blockId;
+			public bool finalRoad=false;
 
 			public RoadBlock(MapHexa.Coordinate coords, int id) {
 				coord = coords;
@@ -35,9 +36,9 @@ public class Roads {
 			roadBlocks.Add (block);
 			//GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (block.coord).GetComponent<MapHexa> ().roadBlock = block;
 			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (block.coord).GetComponent<MapHexa> ().rbid = block.blockId;
-			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (block.coord).GetComponent<MapHexa>().setType(MapHexa.HexType.Road);
+			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (block.coord).GetComponent<MapHexa> ().setType (MapHexa.HexType.Road);
 		}
-		/*
+
 		public void deleteRoadBlock(MapHexa.Coordinate coord) {
 			for (int i = roadBlocks.Count - 1; i >= 0; i--) {
 				if (coord.rowId == roadBlocks [i].coord.rowId && coord.hexaId == roadBlocks [i].coord.hexaId) {
@@ -45,8 +46,9 @@ public class Roads {
 					break;
 				}
 			}
+			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (coord).GetComponent<MapHexa> ().rbid = 0;
 			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (coord).GetComponent<MapHexa>().setType(MapHexa.HexType.Grass);
-		}*/
+		}
 
 		public void deleteRoadBlock(int blockid) {
 			//Debug.Log ("Delete block with id "+blockid);

@@ -20,6 +20,7 @@ public class MapHexa : MonoBehaviour {
 	public GameObject gameController;
 	public Roads.Road.RoadBlock roadBlock = null; // For debug
 	public int rbid;
+	public bool finalR=false;
 
 	void Awake() {
 		hexType = HexType.Grass;

@@ -34,7 +34,7 @@ public class GenerateMap : MonoBehaviour {
 	}
 	void Start () {
 		int seed = Random.Range(0,100000);
-		Random.seed = 9762;
+		Random.seed = seed;
 		Debug.Log ("Seed: "+ seed);
 		// Inits
 		rowIDs = 0; // Reset for possible new map
@@ -121,6 +121,7 @@ public class GenerateMap : MonoBehaviour {
 		Roads.Road firstRoad = new Roads.Road (0); // First road with id 0
 		mapData.getRoads().addRoad(firstRoad); // TODO: move to constructor
 		Roads.Road.RoadBlock firstBlock = new Roads.Road.RoadBlock(firstCoords,0);
+		firstBlock.finalRoad = true;
 		firstRoad.addRoadBlock(firstBlock);
 
 
@@ -128,6 +129,11 @@ public class GenerateMap : MonoBehaviour {
 		System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 		sw.Start ();
 		int ret = buildRoad(ref firstRoad, mapData.getHexa(firstCoords).GetComponent<MapHexa>(),firstBlock,1,MapHexa.HexDir.W);
+
+		// Debug
+		for (int i = 0; i < firstRoad.roadBlocks.Count; i++) {
+			Debug.Log ("RoadBlock: "+i+" "+firstRoad.roadBlocks[i].coord.rowId+" "+firstRoad.roadBlocks[i].coord.hexaId);
+		}
 		sw.Stop ();
 		if (ret == 0) {
 			Debug.Log ("Road build fail");
@@ -182,6 +188,8 @@ public class GenerateMap : MonoBehaviour {
 				//Debug.Log ("End found");
 				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
 				road.addRoadBlock (newBlock);
+				newBlock.finalRoad = true;
+				hexa.finalR = true;
 				return 1;
 			}
 			sw.Stop ();
@@ -221,6 +229,16 @@ public class GenerateMap : MonoBehaviour {
 			int ret = buildRoad(ref road, hexa,newBlock,id+1,getCounterDir(dir));
 			// Check if we have been successful reaching the end, set hexa to road
 			if (ret == 1) {
+				newBlock.finalRoad = true;
+				hexa.finalR = true;
+				// Finally, remove all the extra blocks
+				if (id == 1) {
+					for (int a = road.roadBlocks.Count-1; a >=0; a--) {
+						if (!road.roadBlocks [a].finalRoad) {
+							road.deleteRoadBlock (road.roadBlocks[a].coord);
+						}
+					}
+				}
 				return 1;
 			}
 			// Leave the block only if ret is 1
@@ -233,7 +251,7 @@ public class GenerateMap : MonoBehaviour {
 			// Else we have to continue if we can reach the end from here
 		}
 		// If we fail at this point, clean made block and return to previous block
-		Debug.Break();
+		//Debug.Break();
 
 		return 0;
 	}
