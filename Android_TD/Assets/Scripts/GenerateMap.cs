@@ -24,10 +24,10 @@ public class GenerateMap : MonoBehaviour {
 	// Road generator stuff
 	public int roadMinLength = 10;
 
-	public long timeUsedToEndCheck=0;
-	public long timeUsedToBaseCheck=0;
-	public long timeUsedToDeletes = 0;
-	public long timeUsedToBegin = 0;
+	//public long timeUsedToEndCheck=0;
+	//public long timeUsedToBaseCheck=0;
+	//public long timeUsedToDeletes = 0;
+	//public long timeUsedToBegin = 0;
 
 	void Awake() {
 		mapData = gameController.GetComponent<MapData> ();
@@ -35,7 +35,7 @@ public class GenerateMap : MonoBehaviour {
 	void Start () {
 		int seed = Random.Range(0,100000);
 		Random.seed = seed;
-		Debug.Log ("Seed: "+ seed);
+		Debug.Log ("Seed: "+ Random.seed);
 		// Inits
 		rowIDs = 0; // Reset for possible new map
 
@@ -63,7 +63,7 @@ public class GenerateMap : MonoBehaviour {
 
 		// Create rows and hexagons
 		for (int i = 0; i < rows; i++){
-			Debug.Log ("Starting row adding");
+			//Debug.Log ("Starting row adding");
 			if (i % 2 == 0) {
 				position = new Vector3 (0.0f, i * rowH, 0.0f);
 				offsetRowFlag = false; // Offset false if starting from 0
@@ -84,7 +84,7 @@ public class GenerateMap : MonoBehaviour {
 				row.GetComponent<MapRow> ().AddHex (row, a, a*wDist,0,0);
 			}
 			rowList.Add (row);
-			Debug.Log ("Finishing");
+			//Debug.Log ("Finishing");
 		}
 	}
 
@@ -95,20 +95,35 @@ public class GenerateMap : MonoBehaviour {
 
 		// Generate road starts
 		MapHexa.Coordinate firstCoords;
+		MapHexa.Coordinate secondCoords;
+		MapHexa.Coordinate thirdCoords;
 
 		switch (roadEnd.getEndPos()) {
 		case MapData.RoadEnd.EndPositions.East:
 			firstCoords.hexaId = 0;
 			firstCoords.rowId = Random.Range (1, rows - 1);
+			secondCoords.rowId = 0;
+			secondCoords.hexaId = Random.Range (1, columns - 5);
+			thirdCoords.rowId = rows-1;
+			thirdCoords.hexaId = Random.Range (1, columns - 5);
 			break;
 		case MapData.RoadEnd.EndPositions.West:
 			firstCoords.hexaId = columns;
 			firstCoords.rowId = Random.Range (1, rows - 1);
+			secondCoords.rowId = 0;
+			secondCoords.hexaId = Random.Range (5, columns - 1);
+			thirdCoords.rowId = rows-1;
+			thirdCoords.hexaId = Random.Range (5, columns - 1);
 			break;
 		default:
+			// Default at East
 			Debug.LogWarning ("RoadEnd endpos default proc: value is " + roadEnd.getEndPos());
 			firstCoords.hexaId = 0;
 			firstCoords.rowId = Random.Range (1, rows - 1);
+			secondCoords.rowId = 0;
+			secondCoords.hexaId = Random.Range (1, columns - 5);
+			thirdCoords.rowId = rows-1;
+			thirdCoords.hexaId = Random.Range (1, columns - 5);
 			MapHexa.Coordinate coords;
 			coords.hexaId = columns-2;
 			coords.rowId = rows - 2;
@@ -116,75 +131,93 @@ public class GenerateMap : MonoBehaviour {
 			break;
 		}
 
+		// Set starting hexa type as a Road
 		mapData.getHexa(firstCoords).GetComponent<MapHexa>().GetComponent<MapHexa>().setType(MapHexa.HexType.Road);
-
+		// Create first road and set first block to it
 		Roads.Road firstRoad = new Roads.Road (0); // First road with id 0
 		mapData.getRoads().addRoad(firstRoad); // TODO: move to constructor
 		Roads.Road.RoadBlock firstBlock = new Roads.Road.RoadBlock(firstCoords,0);
 		firstBlock.finalRoad = true;
 		firstRoad.addRoadBlock(firstBlock);
 
-
 		// Generate first road
 		System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 		sw.Start ();
-		int ret = buildRoad(ref firstRoad, mapData.getHexa(firstCoords).GetComponent<MapHexa>(),firstBlock,1,MapHexa.HexDir.W);
-
-		// Debug
-		for (int i = 0; i < firstRoad.roadBlocks.Count; i++) {
-			Debug.Log ("RoadBlock: "+i+" "+firstRoad.roadBlocks[i].coord.rowId+" "+firstRoad.roadBlocks[i].coord.hexaId);
-		}
+		int roadOneSuccess = buildMainRoad(ref firstRoad, mapData.getHexa(firstCoords).GetComponent<MapHexa>(),firstBlock,1,MapHexa.HexDir.W);
 		sw.Stop ();
-		if (ret == 0) {
+
+		// Same to second road
+		mapData.getHexa(secondCoords).GetComponent<MapHexa>().GetComponent<MapHexa>().setType(MapHexa.HexType.Road);
+
+		Roads.Road secondRoad = new Roads.Road (1); // Second road with id 1
+		mapData.getRoads().addRoad(secondRoad); // TODO: move to constructor
+		Roads.Road.RoadBlock secondBlock = new Roads.Road.RoadBlock(secondCoords,0);
+		secondBlock.finalRoad = true;
+		secondRoad.addRoadBlock(secondBlock);
+		// Check if the road is connected with one block already
+		int roadTwoSuccess;
+		if (isOtherRoadNearby (mapData.getHexa(secondCoords).GetComponent<MapHexa>(), secondRoad.roadId) )
+			roadTwoSuccess = 1;
+		else 
+			roadTwoSuccess = buildSecRoads (ref secondRoad, mapData.getHexa(secondCoords).GetComponent<MapHexa>(),secondBlock,1,MapHexa.HexDir.NE);
+
+		// ... And to third road TODO: Function this
+		mapData.getHexa(thirdCoords).GetComponent<MapHexa>().GetComponent<MapHexa>().setType(MapHexa.HexType.Road);
+
+		Roads.Road thirdRoad = new Roads.Road (2); // Third road with id 2
+		mapData.getRoads().addRoad(thirdRoad); // TODO: move to constructor
+		Roads.Road.RoadBlock thirdBlock = new Roads.Road.RoadBlock(thirdCoords,0);
+		thirdBlock.finalRoad = true;
+		thirdRoad.addRoadBlock(thirdBlock);
+		// Check if the road is connected with one block already
+		int roadThreeSuccess;
+		if (isOtherRoadNearby (mapData.getHexa(thirdCoords).GetComponent<MapHexa>(), thirdRoad.roadId) )
+			roadThreeSuccess = 1;
+		else 
+			roadThreeSuccess = buildSecRoads (ref thirdRoad, mapData.getHexa(thirdCoords).GetComponent<MapHexa>(),thirdBlock,1,MapHexa.HexDir.SE);
+		
+		if (   roadOneSuccess == 0 
+			|| roadTwoSuccess == 0
+			|| roadThreeSuccess == 0
+		) {
 			Debug.Log ("Road build fail");
 		} else {
 			Debug.Log ("Road build success");
-			Debug.Log ("Total time: "+ sw.ElapsedTicks);
-			Debug.Log ("Time used to Base: "+timeUsedToBaseCheck);
-			Debug.Log ("Time used to Deletes: "+timeUsedToDeletes);
-			Debug.Log ("Time used to End: "+timeUsedToEndCheck);
-			Debug.Log ("Time used to Begin: "+timeUsedToBegin);
+			Debug.Log ("Total time: "+ sw.ElapsedMilliseconds);
+			//Debug.Log ("Time used to Base: "+timeUsedToBaseCheck);
+			//Debug.Log ("Time used to Deletes: "+timeUsedToDeletes);
+			//Debug.Log ("Time used to End: "+timeUsedToEndCheck);
+			//Debug.Log ("Time used to Begin: "+timeUsedToBegin);
 		}
 
 
 		// Generate rest of the roads
 	}
-	// Builds first road from start to end.
-	private int buildRoad(ref Roads.Road road,MapHexa currentHexa, Roads.Road.RoadBlock currentBlock,int id,MapHexa.HexDir incDir) {
-		//if (id == 83)
-		//	return 1;
-		//MapHexa.Coordinate currentCoords = currentRoadBlock.getCoords ();
-		//bool foundNext = false;
-		//Debug.Log ("<color=red> Now at "+currentHexa.getCoords().rowId+" "+currentHexa.getCoords().hexaId+" </color> ");
+
+	private int buildSecRoads(ref Roads.Road road,MapHexa currentHexa, Roads.Road.RoadBlock currentBlock,int id,MapHexa.HexDir incDir) {
+		
 		Roads.Road.RoadBlock newBlock;
 		List <MapHexa.HexDir> possibleDirections = initDirectionsExcNbours (incDir);
-		//Debug.Log ("Chosen dirs: "+possibleDirections[0]+" "+possibleDirections[1]+" "+possibleDirections[2]);
-		System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+
 		// Randomize next direction
 		for (int i = possibleDirections.Count-1; i >= 0; i--) {
-			sw.Start ();
+
 			// Randomize direction
 			MapHexa.HexDir dir = possibleDirections [Random.Range (0, i+1)];
 			possibleDirections.Remove (dir);
 			//Debug.Log ("Checking direction "+dir);
 			// Take hexa from that direction
-			sw.Stop();
-			timeUsedToBegin += sw.ElapsedTicks;
-			sw.Reset ();
+
 			if (currentHexa.getNeighbour (dir) == null) continue;
-			sw.Start ();
 			MapHexa hexa = currentHexa.getNeighbour (dir).GetComponent<MapHexa>();
-			// Check if we have reached end
-			//TODO: check if end is near instead
-			sw.Stop();
-			timeUsedToBegin += sw.ElapsedTicks;
-			sw.Reset();
-			sw.Start ();
-			if (isEndNear(hexa)) {
-				
-				sw.Stop ();
-				timeUsedToEndCheck += sw.ElapsedTicks;
-				sw.Reset ();
+			// Check if we have reached end OR we are colliding other road here
+			//Debug.Log("pörrr");
+			if (isHexaAtTheEdge (hexa.getCoords ())) {
+				// Continue to next direction if we can't
+				continue;
+			}
+
+			if (isEndNear(hexa) || isOtherRoadNearby (hexa, road.roadId)) {
 				//Debug.Log ("End found");
 				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
 				road.addRoadBlock (newBlock);
@@ -192,41 +225,109 @@ public class GenerateMap : MonoBehaviour {
 				hexa.finalR = true;
 				return 1;
 			}
-			sw.Stop ();
-			timeUsedToEndCheck += sw.ElapsedTicks;
+			// Check if we can go there
+
+			if (isHexaNearThisRoad(hexa.getCoords(),road.roadId,getCounterDir(dir)) ){
+				// Continue to next direction if we can't
+				continue;
+			}
+
+			// Add new roadBlock with given id
+			newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
+			road.addRoadBlock (newBlock);
+			// Call next roadblock
+			int ret = buildSecRoads(ref road, hexa,newBlock,id+1,getCounterDir(dir));
+			// Check if we have been successful reaching the end, set hexa to road
+			if (ret == 1) {
+				newBlock.finalRoad = true;
+				hexa.finalR = true;
+				// Finally, remove all the extra blocks
+				if (id == 1) {
+					for (int a = road.roadBlocks.Count-1; a >=0; a--) {
+						if (!road.roadBlocks [a].finalRoad) {
+							road.deleteRoadBlock (road.roadBlocks[a].coord);
+						}
+					}
+					//Debug.Log ("Roadhexas block: "+ road.getRoadBlock(2).blockId +" and "+  mapData.getHexa(road.getRoadBlock(2).coord).GetComponent<MapHexa>().roadBlock.blockId);
+				}
+				return 1;
+			}
+			// Leave the block only if ret is 1
+			// Else we have to continue if we can reach the end from here
+		}
+		// If we fail at this point, clean made block and return to previous block
+		//Debug.Break();
+
+		return 0;
+	}
+
+	private bool isOtherRoadNearby(MapHexa hexa, int myRoadId) {
+		//Debug.Log ("asdf");
+		List <MapHexa.HexDir> directions = initDirections ();
+		if (hexa == null)
+			return false;
+		for (int i = 0; i < directions.Count; i++) {
+			if (hexa.getNeighbour (directions [i]) == null)
+				continue;
+			MapHexa nearby = hexa.getNeighbour (directions [i]).GetComponent<MapHexa>();
+
+			if (nearby.getHexType () == MapHexa.HexType.Road && nearby.roadBlock != null && nearby.roadBlock.roadId != myRoadId) {
+				
+				return true;
+			}
+
+		}
+		return false;
+	}
+
+	// Builds first road from start to end.
+	private int buildMainRoad(ref Roads.Road road,MapHexa currentHexa, Roads.Road.RoadBlock currentBlock,int id,MapHexa.HexDir incDir) {
+		//if (id == 83)
+		//	return 1;
+		//MapHexa.Coordinate currentCoords = currentRoadBlock.getCoords ();
+		//bool foundNext = false;
+		//Debug.Log ("<color=red> Now at "+currentHexa.getCoords().rowId+" "+currentHexa.getCoords().hexaId+" </color> ");
+		Roads.Road.RoadBlock newBlock;
+		List <MapHexa.HexDir> possibleDirections = initDirectionsExcNbours (incDir);
+
+		// Randomize next direction
+		for (int i = possibleDirections.Count-1; i >= 0; i--) {
+			
+			// Randomize direction
+			MapHexa.HexDir dir = possibleDirections [Random.Range (0, i+1)];
+			possibleDirections.Remove (dir);
+			//Debug.Log ("Checking direction "+dir);
+			// Take hexa from that direction
+
+			if (currentHexa.getNeighbour (dir) == null) continue;
+			MapHexa hexa = currentHexa.getNeighbour (dir).GetComponent<MapHexa>();
+			// Check if we have reached end
+			if (isEndNear(hexa)) {
+				
+				//Debug.Log ("End found");
+				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
+				road.addRoadBlock (newBlock);
+				newBlock.finalRoad = true;
+				hexa.finalR = true;
+				return 1;
+			}
 			//Debug.Log ("<color=red>Going to </color> "+dir);
 
 			// Check if we can go there
-			sw.Reset();
-			sw.Start ();
 			if (isHexaAtTheEdge (hexa.getCoords ())) {
-				sw.Stop ();
-				timeUsedToBaseCheck += sw.ElapsedTicks;
-				sw.Reset();
-				//if (id == 1)
-					//Debug.Log ("Couldn't go to " + dir+ ", Hexa at the edge");
 				// Continue to next direction if we can't
 				continue;
 			}
 			if (isHexaNearThisRoad(hexa.getCoords(),road.roadId,getCounterDir(dir)) ){
-				sw.Stop ();
-				timeUsedToBaseCheck += sw.ElapsedTicks;
-				sw.Reset();
-				//Debug.Log ("Couldn't go to "+dir+ ", Hexa near the road counterDir"+getCounterDir(dir)+" id is "+id);
 				// Continue to next direction if we can't
 					continue;
 			}
-
-
-			//Debug.Log ("<color=red>Found a way to </color> "+dir);
+				
 			// Add new roadBlock with given id
 			newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
 			road.addRoadBlock (newBlock);
-			sw.Stop ();
-			timeUsedToBaseCheck += sw.ElapsedTicks;
-			sw.Reset();
 			// Call next roadblock
-			int ret = buildRoad(ref road, hexa,newBlock,id+1,getCounterDir(dir));
+			int ret = buildMainRoad(ref road, hexa,newBlock,id+1,getCounterDir(dir));
 			// Check if we have been successful reaching the end, set hexa to road
 			if (ret == 1) {
 				newBlock.finalRoad = true;
@@ -242,12 +343,6 @@ public class GenerateMap : MonoBehaviour {
 				return 1;
 			}
 			// Leave the block only if ret is 1
-
-			sw.Start ();
-			//road.deleteRoadBlock(id);
-			sw.Stop ();
-			timeUsedToDeletes += sw.ElapsedTicks;
-			sw.Reset();
 			// Else we have to continue if we can reach the end from here
 		}
 		// If we fail at this point, clean made block and return to previous block
@@ -331,20 +426,6 @@ public class GenerateMap : MonoBehaviour {
 		}
 		return false;
 	}
-	// Check if hex in given coords are in the road already NOT USED
-	/*public bool isHexaInThisRoad(MapHexa.Coordinate hexCoords, int roadId) {
-		if (mapData.getHexa (hexCoords).GetComponent<MapHexa> ().getHexType () != MapHexa.HexType.Road)
-			return false;
-		else {
-			Roads.Road road = mapData.getRoads().getRoad (roadId);
-			for (int i = 0; i < road.roadBlocks.Count; i++){
-				if (road.roadBlocks [i].coord.rowId == hexCoords.rowId && road.roadBlocks [i].coord.hexaId == hexCoords.hexaId) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}*/
 
 	// Adds direction that excludes given direction and its neighbours
 	private List<MapHexa.HexDir> initDirectionsExcNbours(MapHexa.HexDir dir) {

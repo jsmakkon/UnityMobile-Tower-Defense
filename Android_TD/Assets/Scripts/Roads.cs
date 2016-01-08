@@ -16,6 +16,7 @@ public class Roads {
 			public MapHexa.Coordinate coord;
 			public MapHexa.HexDir roadDirection;
 			public int blockId;
+			public int roadId = -1;
 			public bool finalRoad=false;
 
 			public RoadBlock(MapHexa.Coordinate coords, int id) {
@@ -33,8 +34,9 @@ public class Roads {
 		public void addRoadBlock(RoadBlock block) {
 			if (block == null)
 				return;
+			block.roadId = this.roadId;
 			roadBlocks.Add (block);
-			//GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (block.coord).GetComponent<MapHexa> ().roadBlock = block;
+			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (block.coord).GetComponent<MapHexa> ().roadBlock = block;
 			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (block.coord).GetComponent<MapHexa> ().rbid = block.blockId;
 			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (block.coord).GetComponent<MapHexa> ().setType (MapHexa.HexType.Road);
 		}
@@ -46,6 +48,7 @@ public class Roads {
 					break;
 				}
 			}
+			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (coord).GetComponent<MapHexa> ().roadBlock = null;
 			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (coord).GetComponent<MapHexa> ().rbid = 0;
 			GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (coord).GetComponent<MapHexa>().setType(MapHexa.HexType.Grass);
 		}
@@ -55,7 +58,7 @@ public class Roads {
 			for (int i = roadBlocks.Count - 1; i >= 0; i--) {
 				if (roadBlocks [i].blockId ==blockid) {
 					//Debug.Log ("Removing blockid "+ blockid + " from "+ roadBlocks [i].coord.rowId+" "+roadBlocks [i].coord.hexaId);
-					//GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (roadBlocks [i].coord).GetComponent<MapHexa> ().roadBlock = null;
+					GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (roadBlocks [i].coord).GetComponent<MapHexa> ().roadBlock = null;
 					GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (roadBlocks [i].coord).GetComponent<MapHexa> ().rbid = 0;
 					GameObject.Find ("GameController").GetComponent<MapData> ().getHexa (roadBlocks [i].coord).GetComponent<MapHexa>().setType(MapHexa.HexType.Grass);
 					roadBlocks.RemoveAt (i);

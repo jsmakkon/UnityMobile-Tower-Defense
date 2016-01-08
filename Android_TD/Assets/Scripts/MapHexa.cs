@@ -18,12 +18,13 @@ public class MapHexa : MonoBehaviour {
 	public List<Material> materials;
 	private HexType hexType;
 	public GameObject gameController;
-	public Roads.Road.RoadBlock roadBlock = null; // For debug
+	public Roads.Road.RoadBlock roadBlock; // Links hexas to their appropriate roadBlock
 	public int rbid;
 	public bool finalR=false;
 
 	void Awake() {
 		hexType = HexType.Grass;
+		roadBlock = null;
 		setTexture (0);
 		gameController = GameObject.Find ("GameController");
 	}
