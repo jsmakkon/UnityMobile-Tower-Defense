@@ -24,53 +24,53 @@ public class GenerateMap : MonoBehaviour {
 	// Road generator stuff
 	public int roadMinLength = 10;
 
-	//public long timeUsedToEndCheck=0;
-	//public long timeUsedToBaseCheck=0;
-	//public long timeUsedToDeletes = 0;
-	//public long timeUsedToBegin = 0;
-
 	void Awake() {
 		mapData = gameController.GetComponent<MapData> ();
 	}
 	void Start () {
-		int seed = Random.Range(0,100000);
-		Random.seed = seed;
-		Debug.Log ("Seed: "+ Random.seed);
+		
 		// Inits
-		rowIDs = 0; // Reset for possible new map
-
-		GenerateMapBlocks();
-
-
-		// TEMP: roadend init
-		//Debug.Log("generate inits");
-		MapData.RoadEnd roadEnd = gameController.GetComponent<MapData>().getRoadEnd();
-
-		roadEnd.setEndPos( MapData.RoadEnd.EndPositions.East);
-		MapHexa.Coordinate coords;
-		coords.hexaId = columns-2;
-		coords.rowId = rows - 2;
-		roadEnd.setCoords (coords);
-
-		GenerateRoads ();
-
+		setRandomSeed ();
+		rowIDs = 0; // Reset for new map
+		// Generate hexas to map
+		generateMapBlocks();
+		// Create end of the road (players base)
+		createRoadEnd();
+		// Generate roads
+		while (generateRoads () == 0) {
+			setRandomSeed ();
+			mapData.deleteRoads ();
+			rowIDs = 0;
+			generateMapBlocks();
+			createRoadEnd();
+		}
 	}
 
-	private void GenerateMapBlocks() {
+	private void generateMapBlocks() {
 		Vector3 position;
 		bool offsetRowFlag;
 		List<GameObject> rowList= gameController.GetComponent<MapData>().getRowList();
+		// Clear if we are recreating map
+		rowList.Clear ();
+		GameObject map = GameObject.Find ("Map");
+		for (int i = map.transform.childCount - 1; i >= 0; i--) {
+			GameObject child = map.transform.GetChild (i).gameObject;
+			for (int a = child.transform.childCount - 1; a >= 0; a--) {
+				Destroy(child.transform.GetChild (a).gameObject);
+			}
+			Destroy(child);
+		}
 
 		// Create rows and hexagons
 		for (int i = 0; i < rows; i++){
-			//Debug.Log ("Starting row adding");
+			
 			if (i % 2 == 0) {
 				position = new Vector3 (0.0f, i * rowH, 0.0f);
-				offsetRowFlag = false; // Offset false if starting from 0
+				offsetRowFlag = false; 
 			}
 			else {
 				position = new Vector3 (rowOffset, i * rowH, 0.0f);
-				offsetRowFlag = true; // Offset true if moving the row to the right
+				offsetRowFlag = true; // Offset true if row is indented
 			}
 			// Create row, with id 0,1,2,3... rows -1;
 			GameObject row = (GameObject)Instantiate (rowPrefab, position, this.transform.rotation);
@@ -84,14 +84,13 @@ public class GenerateMap : MonoBehaviour {
 				row.GetComponent<MapRow> ().AddHex (row, a, a*wDist,0,0);
 			}
 			rowList.Add (row);
-			//Debug.Log ("Finishing");
 		}
 	}
 
 
 
-	private void GenerateRoads() {
-		MapData.RoadEnd roadEnd=mapData.getRoadEnd();
+	private int generateRoads() {
+		Roads.RoadEnd roadEnd=mapData.getRoadEnd();
 
 		// Generate road starts
 		MapHexa.Coordinate firstCoords;
@@ -99,7 +98,7 @@ public class GenerateMap : MonoBehaviour {
 		MapHexa.Coordinate thirdCoords;
 
 		switch (roadEnd.getEndPos()) {
-		case MapData.RoadEnd.EndPositions.East:
+		case Roads.RoadEnd.EndPositions.East:
 			firstCoords.hexaId = 0;
 			firstCoords.rowId = Random.Range (1, rows - 1);
 			secondCoords.rowId = 0;
@@ -107,7 +106,7 @@ public class GenerateMap : MonoBehaviour {
 			thirdCoords.rowId = rows-1;
 			thirdCoords.hexaId = Random.Range (1, columns - 5);
 			break;
-		case MapData.RoadEnd.EndPositions.West:
+		case Roads.RoadEnd.EndPositions.West:
 			firstCoords.hexaId = columns;
 			firstCoords.rowId = Random.Range (1, rows - 1);
 			secondCoords.rowId = 0;
@@ -159,6 +158,7 @@ public class GenerateMap : MonoBehaviour {
 		if (isOtherRoadNearby (mapData.getHexa(secondCoords).GetComponent<MapHexa>(), secondRoad.roadId) )
 			roadTwoSuccess = 1;
 		else 
+			// Generate second road
 			roadTwoSuccess = buildSecRoads (ref secondRoad, mapData.getHexa(secondCoords).GetComponent<MapHexa>(),secondBlock,1,MapHexa.HexDir.NE);
 
 		// ... And to third road TODO: Function this
@@ -174,6 +174,7 @@ public class GenerateMap : MonoBehaviour {
 		if (isOtherRoadNearby (mapData.getHexa(thirdCoords).GetComponent<MapHexa>(), thirdRoad.roadId) )
 			roadThreeSuccess = 1;
 		else 
+			// Generate third road
 			roadThreeSuccess = buildSecRoads (ref thirdRoad, mapData.getHexa(thirdCoords).GetComponent<MapHexa>(),thirdBlock,1,MapHexa.HexDir.SE);
 		
 		if (   roadOneSuccess == 0 
@@ -181,9 +182,12 @@ public class GenerateMap : MonoBehaviour {
 			|| roadThreeSuccess == 0
 		) {
 			Debug.Log ("Road build fail");
+			Debug.Log ("Total time: "+ sw.ElapsedMilliseconds);
+			return 0;
 		} else {
 			Debug.Log ("Road build success");
 			Debug.Log ("Total time: "+ sw.ElapsedMilliseconds);
+			return 1;
 			//Debug.Log ("Time used to Base: "+timeUsedToBaseCheck);
 			//Debug.Log ("Time used to Deletes: "+timeUsedToDeletes);
 			//Debug.Log ("Time used to End: "+timeUsedToEndCheck);
@@ -216,12 +220,27 @@ public class GenerateMap : MonoBehaviour {
 				// Continue to next direction if we can't
 				continue;
 			}
-
-			if (isEndNear(hexa) || isOtherRoadNearby (hexa, road.roadId)) {
-				//Debug.Log ("End found");
+			MapHexa nearbyHexa = isOtherRoadNearby (hexa, road.roadId);
+			if (nearbyHexa != null) {
 				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
+				currentBlock.nextRoadBlock.roadId = road.roadId;
+				currentBlock.nextRoadBlock.roadBlockId = newBlock.blockId;
 				road.addRoadBlock (newBlock);
 				newBlock.finalRoad = true;
+				newBlock.nextRoadBlock.roadId = nearbyHexa.roadBlock.roadId;
+				newBlock.nextRoadBlock.roadBlockId = nearbyHexa.roadBlock.blockId;
+				hexa.finalR = true;
+				return 1;
+			}
+
+			if (isEndNear(hexa)) {
+				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
+				currentBlock.nextRoadBlock.roadId = road.roadId;
+				currentBlock.nextRoadBlock.roadBlockId = newBlock.blockId;
+				road.addRoadBlock (newBlock);
+				newBlock.finalRoad = true;
+				newBlock.nextRoadBlock.roadId = Constants.RoadEndId;
+				newBlock.nextRoadBlock.roadBlockId = Constants.RoadEndId;
 				hexa.finalR = true;
 				return 1;
 			}
@@ -239,6 +258,8 @@ public class GenerateMap : MonoBehaviour {
 			int ret = buildSecRoads(ref road, hexa,newBlock,id+1,getCounterDir(dir));
 			// Check if we have been successful reaching the end, set hexa to road
 			if (ret == 1) {
+				currentBlock.nextRoadBlock.roadId = road.roadId;
+				currentBlock.nextRoadBlock.roadBlockId = newBlock.blockId;
 				newBlock.finalRoad = true;
 				hexa.finalR = true;
 				// Finally, remove all the extra blocks
@@ -261,11 +282,11 @@ public class GenerateMap : MonoBehaviour {
 		return 0;
 	}
 
-	private bool isOtherRoadNearby(MapHexa hexa, int myRoadId) {
+	private MapHexa isOtherRoadNearby(MapHexa hexa, int myRoadId) {
 		//Debug.Log ("asdf");
 		List <MapHexa.HexDir> directions = initDirections ();
 		if (hexa == null)
-			return false;
+			return null;
 		for (int i = 0; i < directions.Count; i++) {
 			if (hexa.getNeighbour (directions [i]) == null)
 				continue;
@@ -273,11 +294,11 @@ public class GenerateMap : MonoBehaviour {
 
 			if (nearby.getHexType () == MapHexa.HexType.Road && nearby.roadBlock != null && nearby.roadBlock.roadId != myRoadId) {
 				
-				return true;
+				return nearby;
 			}
 
 		}
-		return false;
+		return null;
 	}
 
 	// Builds first road from start to end.
@@ -306,8 +327,12 @@ public class GenerateMap : MonoBehaviour {
 				
 				//Debug.Log ("End found");
 				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
+				currentBlock.nextRoadBlock.roadId = road.roadId;
+				currentBlock.nextRoadBlock.roadBlockId = newBlock.blockId;
 				road.addRoadBlock (newBlock);
 				newBlock.finalRoad = true;
+				newBlock.nextRoadBlock.roadId = Constants.RoadEndId;
+				newBlock.nextRoadBlock.roadBlockId = Constants.RoadEndId;
 				hexa.finalR = true;
 				return 1;
 			}
@@ -330,6 +355,8 @@ public class GenerateMap : MonoBehaviour {
 			int ret = buildMainRoad(ref road, hexa,newBlock,id+1,getCounterDir(dir));
 			// Check if we have been successful reaching the end, set hexa to road
 			if (ret == 1) {
+				currentBlock.nextRoadBlock.roadId = road.roadId;
+				currentBlock.nextRoadBlock.roadBlockId = newBlock.blockId;
 				newBlock.finalRoad = true;
 				hexa.finalR = true;
 				// Finally, remove all the extra blocks
@@ -484,5 +511,20 @@ public class GenerateMap : MonoBehaviour {
 		return directions;
 	}
 
+	private void setRandomSeed() {
+		int seed = Random.Range(0,1000000);
+		Random.seed = seed;
+		Debug.Log ("Seed: "+ Random.seed);
+	}
+
+	// TODO: Create randomness
+	private void createRoadEnd() {
+		Roads.RoadEnd roadEnd = gameController.GetComponent<MapData>().getRoadEnd();
+		roadEnd.setEndPos( Roads.RoadEnd.EndPositions.East);
+		MapHexa.Coordinate coords;
+		coords.hexaId = columns-2;
+		coords.rowId = rows - 2;
+		roadEnd.setCoords (coords);
+	}
 
 }

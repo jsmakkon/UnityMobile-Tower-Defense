@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+using RowList = System.Collections.Generic.List<UnityEngine.GameObject>;
 // Class to contain road information of the map
 
 public class Roads {
@@ -18,11 +19,24 @@ public class Roads {
 			public int blockId;
 			public int roadId = -1;
 			public bool finalRoad=false;
+			// Next block in the road. Enemies can use this to move
+			// through the road.
+
+
+			public struct RoadBlockData
+			{
+				public int roadId;
+				public int roadBlockId;
+			};
+
+			public RoadBlockData nextRoadBlock;
 
 			public RoadBlock(MapHexa.Coordinate coords, int id) {
 				coord = coords;
 				//roadDirection = dir;
 				blockId=id;
+				nextRoadBlock.roadId = -1;
+				nextRoadBlock.roadBlockId = -1;
 			}
 		}
 
@@ -83,6 +97,14 @@ public class Roads {
 		roads = new List<Road> ();
 	}
 
+	public void deleteAllRoads() {
+		roads.Clear ();
+	}
+
+	public int getCount() {
+		return roads.Count;
+	}
+
 	//TODO: remove by id
 	public void deleteRoad(int index) {
 		roads.RemoveAt (index);
@@ -100,10 +122,55 @@ public class Roads {
 		Debug.Log ("No road was found");
 		return null;
 	}
+	// Assuming the roadId is the same as the position in arrays
+	public Road.RoadBlock getRoadBlock(int rId, int rBlockId) {
+		if (roads [rId].roadId == rId)
+			return roads [rId].getRoadBlock (rBlockId);
+		else {
+			for (int i = 0; i < roads.Count; i++) {
+				if (roads [i].roadId == rId)
+					return roads [i].getRoadBlock (rBlockId);
+			}
+		}
+		Debug.Log ("Returning null from getRoadBlock with search of "+rId +" "+ rBlockId);
+		return null;
+	}
 
-	//public RoadBlock getRoadBlock() {
-	//
-	//}
+	public class RoadEnd{
 
+		public GameObject gameController;
 
+		public RoadEnd(GameObject gc) {
+			gameController = gc;
+		}
+
+		public enum EndPositions
+		{
+			None, NWCorner,NECorner,SWCorner,SECorner, East, West
+		};
+
+		private MapHexa.Coordinate endCoordinate;
+		private EndPositions endPos;
+
+		public void setEndPos (EndPositions end) {
+			Debug.Log ("Setting endposition to "+end);
+			endPos = end;
+		}
+
+		public EndPositions getEndPos() {
+			return endPos;
+		}
+
+		public int hp;
+
+		public MapHexa.Coordinate getCoords() {
+			return endCoordinate;
+		}
+
+		public void setCoords(MapHexa.Coordinate coords) {
+			RowList rows=gameController.GetComponent<MapData> ().getRowList ();
+			rows [coords.rowId].GetComponent<MapRow> ().getHexagon (coords.hexaId).GetComponent<MapHexa> ().setType(MapHexa.HexType.End);
+			endCoordinate = coords;
+		}
+	}
 }
