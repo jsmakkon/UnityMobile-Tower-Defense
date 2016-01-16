@@ -222,6 +222,7 @@ public class GenerateMap : MonoBehaviour {
 			}
 			MapHexa nearbyHexa = isOtherRoadNearby (hexa, road.roadId);
 			if (nearbyHexa != null) {
+				
 				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
 				currentBlock.nextRoadBlock.roadId = road.roadId;
 				currentBlock.nextRoadBlock.roadBlockId = newBlock.blockId;
@@ -281,7 +282,7 @@ public class GenerateMap : MonoBehaviour {
 
 		return 0;
 	}
-
+	// Checks if there is road with some other id than the given one and returns that hexa.
 	private MapHexa isOtherRoadNearby(MapHexa hexa, int myRoadId) {
 		//Debug.Log ("asdf");
 		List <MapHexa.HexDir> directions = initDirections ();
@@ -293,7 +294,6 @@ public class GenerateMap : MonoBehaviour {
 			MapHexa nearby = hexa.getNeighbour (directions [i]).GetComponent<MapHexa>();
 
 			if (nearby.getHexType () == MapHexa.HexType.Road && nearby.roadBlock != null && nearby.roadBlock.roadId != myRoadId) {
-				
 				return nearby;
 			}
 
@@ -303,10 +303,6 @@ public class GenerateMap : MonoBehaviour {
 
 	// Builds first road from start to end.
 	private int buildMainRoad(ref Roads.Road road,MapHexa currentHexa, Roads.Road.RoadBlock currentBlock,int id,MapHexa.HexDir incDir) {
-		//if (id == 83)
-		//	return 1;
-		//MapHexa.Coordinate currentCoords = currentRoadBlock.getCoords ();
-		//bool foundNext = false;
 		//Debug.Log ("<color=red> Now at "+currentHexa.getCoords().rowId+" "+currentHexa.getCoords().hexaId+" </color> ");
 		Roads.Road.RoadBlock newBlock;
 		List <MapHexa.HexDir> possibleDirections = initDirectionsExcNbours (incDir);
@@ -372,8 +368,8 @@ public class GenerateMap : MonoBehaviour {
 			// Leave the block only if ret is 1
 			// Else we have to continue if we can reach the end from here
 		}
-		// If we fail at this point, clean made block and return to previous block
-		//Debug.Break();
+		// If we fail at this point, we return without marking the road as final road
+		// so this road will be deleted later.
 
 		return 0;
 	}
