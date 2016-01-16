@@ -10,54 +10,16 @@ public class MapData : MonoBehaviour {
 
 	public GameObject gameController;
 
-	public class RoadEnd{
-
-		public GameObject gameController;
-
-		public RoadEnd(GameObject gc) {
-			gameController = gc;
-		}
-
-		public enum EndPositions
-		{
-			None, NWCorner,NECorner,SWCorner,SECorner, East, West
-		};
-
-		private MapHexa.Coordinate endCoordinate;
-		private EndPositions endPos;
-
-		public void setEndPos (EndPositions end) {
-			Debug.Log ("Setting endposition to "+end);
-			endPos = end;
-		}
-
-		public EndPositions getEndPos() {
-			return endPos;
-		}
-
-		public int hp;
-
-		public MapHexa.Coordinate getCoords() {
-			return endCoordinate;
-		}
-
-		public void setCoords(MapHexa.Coordinate coords) {
-			RowList rows=gameController.GetComponent<MapData> ().getRowList ();
-			rows [coords.rowId].GetComponent<MapRow> ().getHexagon (coords.hexaId).GetComponent<MapHexa> ().setType(MapHexa.HexType.End);
-			endCoordinate = coords;
-		}
-	}
-
 	private RowList rowList;
 	private Roads roads;
-	private RoadEnd roadEnd;
+	private Roads.RoadEnd roadEnd;
 
 
 	void Awake() {
 		//inits
 		//Debug.Log("Runninng inits");
 		rowList = new List<GameObject> ();
-		roadEnd = new RoadEnd (gameController);
+		roadEnd = new Roads.RoadEnd (gameController);
 		roads = new Roads ();
 	}
 
@@ -65,12 +27,16 @@ public class MapData : MonoBehaviour {
 		return rowList;
 	}
 
-	public RoadEnd getRoadEnd() {
+	public Roads.RoadEnd getRoadEnd() {
 		return roadEnd;
 	}
 		
 	public Roads getRoads() {
 		return roads;
+	}
+	public void deleteRoads() {
+		roads.deleteAllRoads ();
+
 	}
 
 	public GameObject getHexa(MapHexa.Coordinate coords) {
