@@ -1,31 +1,50 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class EnemyScript : MonoBehaviour {
 
 	// Add new enemytypes here, also add new case to switch below (to Create() ) 
 	// and function to initialize values
 	public enum EnemyType {
-		Basic
+		Basic // TODO:
+	}
+	public enum EnemyStatusEffect {
+		Poison, Shield // TODO:
 	}
 
+	public struct StatusEffect{
+		EnemyStatusEffect effect;
+		float value;
+	}
+
+	public struct EnemyStats
+	{
+		public float hp;
+		public float strength;
+		public float speed;
+		public float morale;
+	}
+
+	public struct EnemyResistances
+	{
+		public float physical;
+		public float magic;
+	}
 	public static Object enemyPrefab = Resources.Load ("Prefabs/EnemyPrefab");
 
     public int enemyID;
 	public string enemyName;
-	public float hp;
-	public float strength;
-	public float speed;
-	public float armor;
-	public float mResist;
-    //morale
+	public EnemyStats stats;
+	public EnemyResistances resistances;
+	public List<StatusEffect> statusEffects = new List<StatusEffect>();
 	// TODO: add rest of the variables
 
-	// Use this function to create enemy TODO: add animation to spawning here
-	public static EnemyScript Create(EnemyType type, Vector3 position) {
+	// Use this to create enemy TODO: add animation to spawning here
+	public static EnemyScript CreateEnemy(EnemyType type, Vector3 position) {
 		GameObject newObject = (GameObject)Instantiate(enemyPrefab);
 		EnemyScript script = newObject.GetComponent<EnemyScript>();
-		// Specific settings for different enemy types
+		// Specific settings for different enemy types TODO
 		switch (type) {
 		case EnemyType.Basic:
 			script.setBasicEnemy ();
@@ -40,11 +59,13 @@ public class EnemyScript : MonoBehaviour {
 
 	private void setBasicEnemy() {
 		enemyName = "Basic Soldier";
-		hp = 100;
-		strength = 1;
-		speed = 1;
-		armor = 0;
-		mResist = 0;
+		stats.hp = 100;
+		stats.strength = 1;
+		stats.speed = 1;
+		stats.morale = 100;
+		resistances.physical = 0;
+		resistances.magic = 0;
+
 	}
 
 	// Use this for initialization
