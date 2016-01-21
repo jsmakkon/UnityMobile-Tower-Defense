@@ -10,14 +10,13 @@ public class MapData : MonoBehaviour {
 
 	public GameObject gameController;
 
-	private RowList rowList;
-	private Roads roads;
-	private Roads.RoadEnd roadEnd;
+	private RowList rowList; // Hexagons
+	private Roads roads; // Roads 
+	private Roads.RoadEnd roadEnd; // End of the road
 
 
 	void Awake() {
 		//inits
-		//Debug.Log("Runninng inits");
 		rowList = new List<GameObject> ();
 		roadEnd = new Roads.RoadEnd (gameController);
 		roads = new Roads ();
