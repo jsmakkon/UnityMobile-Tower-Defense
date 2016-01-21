@@ -71,15 +71,18 @@
     <Compile Include="Assets\Reporter\Test\TestReporter.cs" />
     <Compile Include="Assets\Scripts\CameraButtons.cs" />
     <Compile Include="Assets\Scripts\CharacterMovement.cs" />
+    <Compile Include="Assets\Scripts\Constants.cs" />
+    <Compile Include="Assets\Scripts\DataSaver\DataSaver.cs" />
     <Compile Include="Assets\Scripts\DragCamera.cs" />
-    <Compile Include="Assets\Scripts\Enemy.cs" />
-    <Compile Include="Assets\Scripts\GenerateMap.cs" />
-    <Compile Include="Assets\Scripts\MapData.cs" />
-    <Compile Include="Assets\Scripts\MapHexa.cs" />
-    <Compile Include="Assets\Scripts\MapRow.cs" />
-    <Compile Include="Assets\Scripts\Roads.cs" />
+    <Compile Include="Assets\Scripts\EnemyScript.cs" />
+    <Compile Include="Assets\Scripts\Map\GenerateMap.cs" />
+    <Compile Include="Assets\Scripts\Map\MapData.cs" />
+    <Compile Include="Assets\Scripts\Map\MapHexa.cs" />
+    <Compile Include="Assets\Scripts\Map\MapRow.cs" />
+    <Compile Include="Assets\Scripts\Map\Roads.cs" />
     <Compile Include="Assets\Scripts\StartMenu.cs" />
     <Compile Include="Assets\Scripts\Tests\MapNeighbourTest.cs" />
+    <Compile Include="Assets\Scripts\Tests\MapRoadTests.cs" />
     <Compile Include="Assets\Scripts\TouchDetection.cs" />
   </ItemGroup>
   <ItemGroup>
