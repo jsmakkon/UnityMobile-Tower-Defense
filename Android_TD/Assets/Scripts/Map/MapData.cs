@@ -14,6 +14,8 @@ public class MapData : MonoBehaviour {
 	private Roads roads; // Roads 
 	private Roads.RoadEnd roadEnd; // End of the road
 
+    public int testingSave;
+
 
 	void Awake() {
 		//inits
