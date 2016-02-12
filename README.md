@@ -7,7 +7,7 @@ The idea of the project is to create a tower defense game with random elements, 
 My responsibilities:
 - Game design
 - Map randomization algorithm
-... more coming...
+- ... more coming...
 
 
 Minja's responsibilities:
@@ -15,4 +15,4 @@ Minja's responsibilities:
 - Camera movement
 - Main character
 - UI
-... more coming ...
+- ... more coming ...
