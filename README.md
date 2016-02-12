@@ -9,6 +9,7 @@ My responsibilities:
 - Map randomization algorithm
 ... more coming...
 
+
 Minja's responsibilities:
 - Saving system
 - Camera movement
