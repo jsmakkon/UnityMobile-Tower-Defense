@@ -22,29 +22,41 @@ public class GenerateMap : MonoBehaviour {
 	private float rowOffset = 0.866025f;
 
 	// Road generator stuff
-	public int roadMinLength = 10;
+	public int roadMinLength = 20;
 
 	void Awake() {
 		mapData = gameController.GetComponent<MapData> ();
 	}
 	void Start () {
+        generateMap();
 		
-		// Inits
-		setRandomSeed ();
-		rowIDs = 0; // Reset for new map
-		// Generate hexas to map
-		generateMapBlocks();
-		// Create end of the road (players base)
-		createRoadEnd();
-		// Generate roads
-		while (generateRoads () == 0) {
-			setRandomSeed ();
-			mapData.deleteRoads ();
-			rowIDs = 0;
-			generateMapBlocks();
-			createRoadEnd();
-		}
 	}
+    // Call this to generate map
+    private void generateMap(int seed = -1)
+    {
+        if (seed == -1)
+            setRandomSeed();
+        else
+            Random.seed = seed;
+        // Inits
+        
+        rowIDs = 0; // Reset for new map
+
+        // Generate hexas to map
+        generateMapBlocks();
+        // Create end of the road (players base)
+        createRoadEnd();
+        // Generate roads
+        while (generateRoads() == 0)
+        {
+            setRandomSeed();
+            mapData.deleteRoads();
+            rowIDs = 0;
+            // Recreate everything on fail
+            generateMapBlocks();
+            createRoadEnd();
+        }
+    }
 
 	private void generateMapBlocks() {
 		Vector3 position;
@@ -153,10 +165,10 @@ public class GenerateMap : MonoBehaviour {
 		Roads.Road.RoadBlock secondBlock = new Roads.Road.RoadBlock(secondCoords,0);
 		secondBlock.finalRoad = true;
 		secondRoad.addRoadBlock(secondBlock);
-		// Check if the road is connected with one block already
+		// Check if the road is connected with one block already, we discard these roads at the moment TODO: fix
 		int roadTwoSuccess;
-		if (isOtherRoadNearby (mapData.getHexa(secondCoords).GetComponent<MapHexa>(), secondRoad.roadId) )
-			roadTwoSuccess = 1;
+		if (isOtherRoadNearby (mapData.getHexa(secondCoords).GetComponent<MapHexa>(), secondRoad.roadId))
+			roadTwoSuccess = 0;
 		else 
 			// Generate second road
 			roadTwoSuccess = buildSecRoads (ref secondRoad, mapData.getHexa(secondCoords).GetComponent<MapHexa>(),secondBlock,1,MapHexa.HexDir.NE);
@@ -171,8 +183,8 @@ public class GenerateMap : MonoBehaviour {
 		thirdRoad.addRoadBlock(thirdBlock);
 		// Check if the road is connected with one block already
 		int roadThreeSuccess;
-		if (isOtherRoadNearby (mapData.getHexa(thirdCoords).GetComponent<MapHexa>(), thirdRoad.roadId) )
-			roadThreeSuccess = 1;
+		if (isOtherRoadNearby (mapData.getHexa(thirdCoords).GetComponent<MapHexa>(), thirdRoad.roadId))
+            roadThreeSuccess = 0;
 		else 
 			// Generate third road
 			roadThreeSuccess = buildSecRoads (ref thirdRoad, mapData.getHexa(thirdCoords).GetComponent<MapHexa>(),thirdBlock,1,MapHexa.HexDir.SE);
@@ -202,6 +214,7 @@ public class GenerateMap : MonoBehaviour {
 		
 		Roads.Road.RoadBlock newBlock;
 		List <MapHexa.HexDir> possibleDirections = initDirectionsExcNbours (incDir);
+        // TODO: add special case when the first hexa is already the nearest
 
 		// Randomize next direction
 		for (int i = possibleDirections.Count-1; i >= 0; i--) {
@@ -209,39 +222,38 @@ public class GenerateMap : MonoBehaviour {
 			// Randomize direction
 			MapHexa.HexDir dir = possibleDirections [Random.Range (0, i+1)];
 			possibleDirections.Remove (dir);
-			//Debug.Log ("Checking direction "+dir);
 			// Take hexa from that direction
-
 			if (currentHexa.getNeighbour (dir) == null) continue;
 			MapHexa hexa = currentHexa.getNeighbour (dir).GetComponent<MapHexa>();
 			// Check if we have reached end OR we are colliding other road here
-			//Debug.Log("pörrr");
+			
 			if (isHexaAtTheEdge (hexa.getCoords ())) {
-				// Continue to next direction if we can't
+				// Continue to next direction, we are at the edge
 				continue;
 			}
 			MapHexa nearbyHexa = isOtherRoadNearby (hexa, road.roadId);
 			if (nearbyHexa != null) {
-				
+				// Other road is nearby, we join to it and start finishing the road
 				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
-				currentBlock.nextRoadBlock.roadId = road.roadId;
-				currentBlock.nextRoadBlock.roadBlockId = newBlock.blockId;
+				currentBlock.setNextRoadId(road.roadId);
+				currentBlock.setNextBlockId(newBlock.getBlockId());
 				road.addRoadBlock (newBlock);
 				newBlock.finalRoad = true;
-				newBlock.nextRoadBlock.roadId = nearbyHexa.roadBlock.roadId;
-				newBlock.nextRoadBlock.roadBlockId = nearbyHexa.roadBlock.blockId;
+				newBlock.setNextRoadId(nearbyHexa.roadBlock.getRoadId());
+				newBlock.setNextBlockId(nearbyHexa.roadBlock.getBlockId());
 				hexa.finalR = true;
 				return 1;
 			}
 
 			if (isEndNear(hexa)) {
-				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
-				currentBlock.nextRoadBlock.roadId = road.roadId;
-				currentBlock.nextRoadBlock.roadBlockId = newBlock.blockId;
+                // The end of the road is near, we join to it and start finishing the road
+                newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
+				currentBlock.setNextRoadId(road.roadId);
+				currentBlock.setNextBlockId(newBlock.getBlockId());
 				road.addRoadBlock (newBlock);
 				newBlock.finalRoad = true;
-				newBlock.nextRoadBlock.roadId = Constants.RoadEndId;
-				newBlock.nextRoadBlock.roadBlockId = Constants.RoadEndId;
+				newBlock.setNextRoadId(Constants.RoadEndId);
+				newBlock.setNextBlockId(Constants.RoadEndId);
 				hexa.finalR = true;
 				return 1;
 			}
@@ -259,8 +271,8 @@ public class GenerateMap : MonoBehaviour {
 			int ret = buildSecRoads(ref road, hexa,newBlock,id+1,getCounterDir(dir));
 			// Check if we have been successful reaching the end, set hexa to road
 			if (ret == 1) {
-				currentBlock.nextRoadBlock.roadId = road.roadId;
-				currentBlock.nextRoadBlock.roadBlockId = newBlock.blockId;
+				currentBlock.setNextRoadId(road.roadId);
+				currentBlock.setNextBlockId(newBlock.getBlockId());
 				newBlock.finalRoad = true;
 				hexa.finalR = true;
 				// Finally, remove all the extra blocks
@@ -270,7 +282,14 @@ public class GenerateMap : MonoBehaviour {
 							road.deleteRoadBlock (road.roadBlocks[a].coord);
 						}
 					}
-					//Debug.Log ("Roadhexas block: "+ road.getRoadBlock(2).blockId +" and "+  mapData.getHexa(road.getRoadBlock(2).coord).GetComponent<MapHexa>().roadBlock.blockId);
+                    // check if road is long enough to goal
+
+                    if (isRoadTooShort(road))
+                    {
+                        Debug.Log("Road " + road.roadId + " is too short..");
+                        return 0;
+                    }
+                        
 				}
 				return 1;
 			}
@@ -293,13 +312,27 @@ public class GenerateMap : MonoBehaviour {
 				continue;
 			MapHexa nearby = hexa.getNeighbour (directions [i]).GetComponent<MapHexa>();
 
-			if (nearby.getHexType () == MapHexa.HexType.Road && nearby.roadBlock != null && nearby.roadBlock.roadId != myRoadId) {
+			if (nearby.getHexType () == MapHexa.HexType.Road && nearby.roadBlock != null && nearby.roadBlock.getRoadId() != myRoadId) {
 				return nearby;
 			}
 
 		}
 		return null;
 	}
+    // Return true if road too short.
+    // Only takes account the given road and the next road, so we are assuming
+    // there is no 3+ road chains
+    private bool isRoadTooShort(Roads.Road road)
+    {
+        int nextRoadId = road.roadBlocks[road.roadBlocks.Count - 1].getNextRoadId();
+        int nextRoadBlockId = road.roadBlocks[road.roadBlocks.Count - 1].getNextBlockId();
+        Debug.Log("Road count: " + road.roadBlocks.Count + " and getDistanceToEndOfRoad with id "+ nextRoadId+ " is: "+ mapData.getRoads().getDistanceToEndOfRoad(nextRoadId, nextRoadBlockId));
+        if (road.roadBlocks.Count + mapData.getRoads().getDistanceToEndOfRoad(nextRoadId, nextRoadBlockId) < roadMinLength)
+        {
+            return true;
+        }
+        else return false;
+    }
 
 	// Builds first road from start to end.
 	private int buildMainRoad(ref Roads.Road road,MapHexa currentHexa, Roads.Road.RoadBlock currentBlock,int id,MapHexa.HexDir incDir) {
@@ -323,12 +356,12 @@ public class GenerateMap : MonoBehaviour {
 				
 				//Debug.Log ("End found");
 				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
-				currentBlock.nextRoadBlock.roadId = road.roadId;
-				currentBlock.nextRoadBlock.roadBlockId = newBlock.blockId;
+				currentBlock.setNextRoadId(road.roadId);
+				currentBlock.setNextBlockId(newBlock.getBlockId());
 				road.addRoadBlock (newBlock);
 				newBlock.finalRoad = true;
-				newBlock.nextRoadBlock.roadId = Constants.RoadEndId;
-				newBlock.nextRoadBlock.roadBlockId = Constants.RoadEndId;
+				newBlock.setNextRoadId(Constants.RoadEndId);
+				newBlock.setNextBlockId(Constants.RoadEndId);
 				hexa.finalR = true;
 				return 1;
 			}
@@ -351,8 +384,8 @@ public class GenerateMap : MonoBehaviour {
 			int ret = buildMainRoad(ref road, hexa,newBlock,id+1,getCounterDir(dir));
 			// Check if we have been successful reaching the end, set hexa to road
 			if (ret == 1) {
-				currentBlock.nextRoadBlock.roadId = road.roadId;
-				currentBlock.nextRoadBlock.roadBlockId = newBlock.blockId;
+				currentBlock.setNextRoadId(road.roadId);
+				currentBlock.setNextBlockId(newBlock.getBlockId());
 				newBlock.finalRoad = true;
 				hexa.finalR = true;
 				// Finally, remove all the extra blocks

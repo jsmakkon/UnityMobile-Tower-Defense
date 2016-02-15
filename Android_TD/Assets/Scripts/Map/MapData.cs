@@ -10,12 +10,11 @@ public class MapData : MonoBehaviour {
 
 	public GameObject gameController;
 
-	private RowList rowList; // Hexagons
+	private RowList rowList; // Hexagons, currently as gameobjectlist TODO: create class
 	private Roads roads; // Roads 
 	private Roads.RoadEnd roadEnd; // End of the road
 
     public int testingSave;
-
 
 	void Awake() {
 		//inits
@@ -37,7 +36,6 @@ public class MapData : MonoBehaviour {
 	}
 	public void deleteRoads() {
 		roads.deleteAllRoads ();
-
 	}
 
 	public GameObject getHexa(MapHexa.Coordinate coords) {
@@ -45,8 +43,6 @@ public class MapData : MonoBehaviour {
 	}
 
 	public GameObject getRow(int id) {
-		//Debug.Log ("getRow id: "+id+ " and count is " + rowList.Count);
-
 		if (id >= rowList.Count || id < 0)
 			return null;
 		if (rowList [id].GetComponent<MapRow> ().rowID == id) {
@@ -61,4 +57,16 @@ public class MapData : MonoBehaviour {
 		Debug.LogError ("getRow failed to find row with id: "+ id);
 		return null;
 	}
+
+    //******* Common helpers ******
+
+    public GameObject getNextHexaInRoad(int roadId, int blockId)
+    {
+        int nextBlockid = roads.getRoad(roadId).getRoadBlock(blockId).getNextBlockId();
+        int nextBlockRoadId = roads.getRoad(roadId).getRoadBlock(blockId).getNextRoadId();
+        MapHexa.Coordinate nextCoords = roads.getRoad(nextBlockRoadId).getRoadBlock(nextBlockid).coord;
+        return getHexa(nextCoords);
+    }
+
+
 }
