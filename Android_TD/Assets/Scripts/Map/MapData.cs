@@ -63,7 +63,7 @@ public class MapData : MonoBehaviour {
     {
         //int nextBlockid = roads.getRoad(roadId).getRoadBlock(blockId).getNextBlockId();
         //int nextBlockRoadId = roads.getRoad(roadId).getRoadBlock(blockId).getNextRoadId();
-        Roads.Road.RoadBlock nextBlock = roads.getRoad(roadId).roadBlocks[roads.getRoad(roadId).roadBlocks.Count - 1].getNextRoadBlock();
+        Roads.Road.RoadBlock nextBlock = roads.getRoad(roadId).roadBlocks[blockId].getNextRoadBlock();
         MapHexa.Coordinate nextCoords = nextBlock.coord;
         return getHexa(nextCoords);
     }

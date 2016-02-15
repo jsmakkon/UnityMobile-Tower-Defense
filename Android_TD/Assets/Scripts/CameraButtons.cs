@@ -32,4 +32,9 @@ public class CameraButtons : MonoBehaviour {
     {
         gameController.GetComponent<DataSaver>().Load();
     }
+
+    public void CreateEnemy()
+    {
+        gameController.GetComponent<MapData>().SpawnEnemyToRoad(0);
+    }
 }

@@ -39,11 +39,6 @@ public class Roads {
                 setBlockId(id);
                 nextRoadBlock = null;
 			}
-            /*
-            public void setNextBlockId(int newId)
-            {
-                nextRoadBlock.roadBlockId = newId;
-            }*/
 
             public void setNextRoadBlock(RoadBlock rb)
             {

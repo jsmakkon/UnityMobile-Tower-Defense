@@ -42,7 +42,7 @@ public class EnemyScript : MonoBehaviour {
 		public float physical;
 		public float magic;
 	}
-	public static Object enemyPrefab = Resources.Load ("Prefabs/EnemyPrefab");
+	public static Object enemyPrefab = Resources.Load("EnemyPrefab", typeof(GameObject));
 
     public int enemyID;
 	public string enemyName;
@@ -52,9 +52,8 @@ public class EnemyScript : MonoBehaviour {
 	// TODO: add rest of the variables
 
 	// Use this to create enemy TODO: add animation to spawning here
-	public static EnemyScript CreateEnemy(EnemyType type, GameObject StartPosition, GameObject NextBlock) {
+	public static EnemyScript CreateEnemy(EnemyType type, GameObject startPosition, GameObject nextBlock) {
 		GameObject newObject = (GameObject)Instantiate(enemyPrefab);
-        newObject.GetComponent<EnemyMovement>().SetInits(StartPosition);
 		EnemyScript script = newObject.GetComponent<EnemyScript>();
 		// Specific settings for different enemy types TODO
 		switch (type) {
@@ -66,7 +65,9 @@ public class EnemyScript : MonoBehaviour {
 			Debug.Log ("Set Basic enemy in case Default");
 			break;
 		}
-		return script;
+
+        newObject.GetComponent<EnemyMovement>().SetInits(startPosition.transform.position, nextBlock);
+        return script;
 	}
 
 	private void setBasicEnemy() {
