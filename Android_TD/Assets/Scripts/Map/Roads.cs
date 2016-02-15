@@ -10,7 +10,7 @@ public class Roads {
 	// Class for road
 	public class Road
 	{
-        // List of roadblocks in this road, they are created so that they are in order
+        // List of roadblocks in this road.
 		public List<RoadBlock> roadBlocks;
 		public int roadId;
 
@@ -30,35 +30,30 @@ public class Roads {
             private RoadBlockData thisRoadBlock;
             // Next block in the road. Enemies can use this to move
             // through the road.
-            private RoadBlockData nextRoadBlock;
+            //private RoadBlockData nextRoadBlock; //TODO: Reference to next object
+            private RoadBlock nextRoadBlock;
 
             public RoadBlock(MapHexa.Coordinate coords, int id) {
 				coord = coords;
                 //roadDirection = dir;
                 setBlockId(id);
-                setNextBlockId(-1);
-                setNextRoadId(-1);
+                nextRoadBlock = null;
 			}
-            public int getNextBlockId()
-            {
-                return nextRoadBlock.roadBlockId;
-            }
-
+            /*
             public void setNextBlockId(int newId)
             {
                 nextRoadBlock.roadBlockId = newId;
-            }
+            }*/
 
-            public int getNextRoadId()
+            public void setNextRoadBlock(RoadBlock rb)
             {
-                return nextRoadBlock.roadId;
+                nextRoadBlock = rb;
             }
-
-            public void setNextRoadId(int newId)
+            public RoadBlock getNextRoadBlock()
             {
-                nextRoadBlock.roadId = newId;
+                return nextRoadBlock;
             }
-
+            
             public int getBlockId()
             {
                 return thisRoadBlock.roadBlockId;
@@ -84,6 +79,11 @@ public class Roads {
 			roadBlocks = new List<RoadBlock>();
 			roadId = id;
 		}
+
+        public RoadBlock getRoadBlockByIndex(int i)
+        {
+            return roadBlocks[i];
+        }
 
 		public void addRoadBlock(RoadBlock block) {
 			if (block == null)

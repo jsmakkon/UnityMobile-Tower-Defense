@@ -21,11 +21,22 @@ public class EnemyScript : MonoBehaviour {
 	public struct EnemyStats
 	{
 		public float hp;
+        public float speed;
 		public float strength;
-		public float speed;
 		public float morale;
 	}
-
+    // Using get set properties..
+    public float Speed
+    {
+        get
+        {
+            return stats.speed;
+        }
+        set
+        {
+            stats.speed = value;
+        }
+    }
 	public struct EnemyResistances
 	{
 		public float physical;
@@ -41,8 +52,9 @@ public class EnemyScript : MonoBehaviour {
 	// TODO: add rest of the variables
 
 	// Use this to create enemy TODO: add animation to spawning here
-	public static EnemyScript CreateEnemy(EnemyType type, Vector3 position) {
+	public static EnemyScript CreateEnemy(EnemyType type, GameObject StartPosition, GameObject NextBlock) {
 		GameObject newObject = (GameObject)Instantiate(enemyPrefab);
+        newObject.GetComponent<EnemyMovement>().SetInits(StartPosition);
 		EnemyScript script = newObject.GetComponent<EnemyScript>();
 		// Specific settings for different enemy types TODO
 		switch (type) {

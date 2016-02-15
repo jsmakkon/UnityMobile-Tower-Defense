@@ -235,12 +235,14 @@ public class GenerateMap : MonoBehaviour {
 			if (nearbyHexa != null) {
 				// Other road is nearby, we join to it and start finishing the road
 				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
-				currentBlock.setNextRoadId(road.roadId);
-				currentBlock.setNextBlockId(newBlock.getBlockId());
+                currentBlock.setNextRoadBlock(newBlock);
+				//currentBlock.setNextRoadId(road.roadId);
+				//currentBlock.setNextBlockId(newBlock.getBlockId());
 				road.addRoadBlock (newBlock);
 				newBlock.finalRoad = true;
-				newBlock.setNextRoadId(nearbyHexa.roadBlock.getRoadId());
-				newBlock.setNextBlockId(nearbyHexa.roadBlock.getBlockId());
+                newBlock.setNextRoadBlock(nearbyHexa.roadBlock);
+				//newBlock.setNextRoadId(nearbyHexa.roadBlock.getRoadId());
+				//newBlock.setNextBlockId(nearbyHexa.roadBlock.getBlockId());
 				hexa.finalR = true;
 				return 1;
 			}
@@ -248,12 +250,14 @@ public class GenerateMap : MonoBehaviour {
 			if (isEndNear(hexa)) {
                 // The end of the road is near, we join to it and start finishing the road
                 newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
-				currentBlock.setNextRoadId(road.roadId);
-				currentBlock.setNextBlockId(newBlock.getBlockId());
+                currentBlock.setNextRoadBlock(newBlock);
+				//currentBlock.setNextRoadId(road.roadId);
+				//currentBlock.setNextBlockId(newBlock.getBlockId());
 				road.addRoadBlock (newBlock);
 				newBlock.finalRoad = true;
-				newBlock.setNextRoadId(Constants.RoadEndId);
-				newBlock.setNextBlockId(Constants.RoadEndId);
+                newBlock.setNextRoadBlock(null); // TODO: make roadEnd here
+				//newBlock.setNextRoadId(Constants.RoadEndId);
+				//newBlock.setNextBlockId(Constants.RoadEndId);
 				hexa.finalR = true;
 				return 1;
 			}
@@ -271,8 +275,9 @@ public class GenerateMap : MonoBehaviour {
 			int ret = buildSecRoads(ref road, hexa,newBlock,id+1,getCounterDir(dir));
 			// Check if we have been successful reaching the end, set hexa to road
 			if (ret == 1) {
-				currentBlock.setNextRoadId(road.roadId);
-				currentBlock.setNextBlockId(newBlock.getBlockId());
+                currentBlock.setNextRoadBlock(newBlock);
+                //currentBlock.setNextRoadId(road.roadId);
+				//currentBlock.setNextBlockId(newBlock.getBlockId());
 				newBlock.finalRoad = true;
 				hexa.finalR = true;
 				// Finally, remove all the extra blocks
@@ -324,10 +329,12 @@ public class GenerateMap : MonoBehaviour {
     // there is no 3+ road chains
     private bool isRoadTooShort(Roads.Road road)
     {
-        int nextRoadId = road.roadBlocks[road.roadBlocks.Count - 1].getNextRoadId();
-        int nextRoadBlockId = road.roadBlocks[road.roadBlocks.Count - 1].getNextBlockId();
-        Debug.Log("Road count: " + road.roadBlocks.Count + " and getDistanceToEndOfRoad with id "+ nextRoadId+ " is: "+ mapData.getRoads().getDistanceToEndOfRoad(nextRoadId, nextRoadBlockId));
-        if (road.roadBlocks.Count + mapData.getRoads().getDistanceToEndOfRoad(nextRoadId, nextRoadBlockId) < roadMinLength)
+        //int nextRoadId = road.roadBlocks[road.roadBlocks.Count - 1].getNextRoadId();
+        //int nextRoadBlockId = road.roadBlocks[road.roadBlocks.Count - 1].getNextBlockId();
+        Roads.Road.RoadBlock nextBlock = road.roadBlocks[road.roadBlocks.Count - 1].getNextRoadBlock();
+
+        //Debug.Log("Road count: " + road.roadBlocks.Count + " and getDistanceToEndOfRoad with id "+ nextRoadId+ " is: "+ mapData.getRoads().getDistanceToEndOfRoad(nextRoadId, nextRoadBlockId));
+        if (road.roadBlocks.Count + mapData.getRoads().getDistanceToEndOfRoad(nextBlock.getRoadId(), nextBlock.getBlockId()) < roadMinLength)
         {
             return true;
         }
@@ -356,12 +363,14 @@ public class GenerateMap : MonoBehaviour {
 				
 				//Debug.Log ("End found");
 				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
-				currentBlock.setNextRoadId(road.roadId);
-				currentBlock.setNextBlockId(newBlock.getBlockId());
+                currentBlock.setNextRoadBlock(newBlock);
+				//currentBlock.setNextRoadId(road.roadId);
+				//currentBlock.setNextBlockId(newBlock.getBlockId());
 				road.addRoadBlock (newBlock);
 				newBlock.finalRoad = true;
-				newBlock.setNextRoadId(Constants.RoadEndId);
-				newBlock.setNextBlockId(Constants.RoadEndId);
+                newBlock.setNextRoadBlock(null); // TODO: end of road
+				//newBlock.setNextRoadId(Constants.RoadEndId);
+				//newBlock.setNextBlockId(Constants.RoadEndId);
 				hexa.finalR = true;
 				return 1;
 			}
@@ -384,8 +393,9 @@ public class GenerateMap : MonoBehaviour {
 			int ret = buildMainRoad(ref road, hexa,newBlock,id+1,getCounterDir(dir));
 			// Check if we have been successful reaching the end, set hexa to road
 			if (ret == 1) {
-				currentBlock.setNextRoadId(road.roadId);
-				currentBlock.setNextBlockId(newBlock.getBlockId());
+                currentBlock.setNextRoadBlock(newBlock);
+				//currentBlock.setNextRoadId(road.roadId);
+				//currentBlock.setNextBlockId(newBlock.getBlockId());
 				newBlock.finalRoad = true;
 				hexa.finalR = true;
 				// Finally, remove all the extra blocks

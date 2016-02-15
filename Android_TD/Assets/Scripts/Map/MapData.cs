@@ -4,7 +4,8 @@ using System.Collections.Generic;
 
 using RowList = System.Collections.Generic.List<UnityEngine.GameObject>;
 
-// Data holder class for map hexas, roads end of road...
+// Data holder class for map hexas, roads end of road. Also 
+// has functions to manipulate this data, create enemy..
 
 public class MapData : MonoBehaviour {
 
@@ -58,14 +59,28 @@ public class MapData : MonoBehaviour {
 		return null;
 	}
 
-    //******* Common helpers ******
-
     public GameObject getNextHexaInRoad(int roadId, int blockId)
     {
-        int nextBlockid = roads.getRoad(roadId).getRoadBlock(blockId).getNextBlockId();
-        int nextBlockRoadId = roads.getRoad(roadId).getRoadBlock(blockId).getNextRoadId();
-        MapHexa.Coordinate nextCoords = roads.getRoad(nextBlockRoadId).getRoadBlock(nextBlockid).coord;
+        //int nextBlockid = roads.getRoad(roadId).getRoadBlock(blockId).getNextBlockId();
+        //int nextBlockRoadId = roads.getRoad(roadId).getRoadBlock(blockId).getNextRoadId();
+        Roads.Road.RoadBlock nextBlock = roads.getRoad(roadId).roadBlocks[roads.getRoad(roadId).roadBlocks.Count - 1].getNextRoadBlock();
+        MapHexa.Coordinate nextCoords = nextBlock.coord;
         return getHexa(nextCoords);
+    }
+
+    public GameObject getRoadHexa(int roadId, int blockId)
+    {
+        MapHexa.Coordinate coords = roads.getRoad(roadId).getRoadBlock(blockId).coord;
+        return getHexa(coords);
+    }
+
+    // Spawns enemy to beginning of the road
+    public void SpawnEnemyToRoad(int roadId)
+    {
+        int firstBlockId = roads.getRoad(roadId).getRoadBlockByIndex(0).getBlockId();
+        int secondBlockId = roads.getRoad(roadId).getRoadBlockByIndex(0).getNextRoadBlock().getBlockId();
+
+        EnemyScript.CreateEnemy(EnemyScript.EnemyType.Basic, getRoadHexa(roadId, firstBlockId), getRoadHexa(roadId, secondBlockId));
     }
 
 
