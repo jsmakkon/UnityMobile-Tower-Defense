@@ -104,7 +104,7 @@ public class GenerateMap : MonoBehaviour {
 	private int generateRoads() {
 		Roads.RoadEnd roadEnd=mapData.getRoadEnd();
 
-		// Generate road starts
+		// Generate road starting hexas
 		MapHexa.Coordinate firstCoords;
 		MapHexa.Coordinate secondCoords;
 		MapHexa.Coordinate thirdCoords;
@@ -236,13 +236,9 @@ public class GenerateMap : MonoBehaviour {
 				// Other road is nearby, we join to it and start finishing the road
 				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
                 currentBlock.setNextRoadBlock(newBlock);
-				//currentBlock.setNextRoadId(road.roadId);
-				//currentBlock.setNextBlockId(newBlock.getBlockId());
 				road.addRoadBlock (newBlock);
 				newBlock.finalRoad = true;
                 newBlock.setNextRoadBlock(nearbyHexa.roadBlock);
-				//newBlock.setNextRoadId(nearbyHexa.roadBlock.getRoadId());
-				//newBlock.setNextBlockId(nearbyHexa.roadBlock.getBlockId());
 				hexa.finalR = true;
 				return 1;
 			}
@@ -251,13 +247,9 @@ public class GenerateMap : MonoBehaviour {
                 // The end of the road is near, we join to it and start finishing the road
                 newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
                 currentBlock.setNextRoadBlock(newBlock);
-				//currentBlock.setNextRoadId(road.roadId);
-				//currentBlock.setNextBlockId(newBlock.getBlockId());
 				road.addRoadBlock (newBlock);
 				newBlock.finalRoad = true;
-                newBlock.setNextRoadBlock(null); // TODO: make roadEnd here
-				//newBlock.setNextRoadId(Constants.RoadEndId);
-				//newBlock.setNextBlockId(Constants.RoadEndId);
+                newBlock.isLastBlock = true; // set so we know next is endroad
 				hexa.finalR = true;
 				return 1;
 			}
@@ -276,8 +268,6 @@ public class GenerateMap : MonoBehaviour {
 			// Check if we have been successful reaching the end, set hexa to road
 			if (ret == 1) {
                 currentBlock.setNextRoadBlock(newBlock);
-                //currentBlock.setNextRoadId(road.roadId);
-				//currentBlock.setNextBlockId(newBlock.getBlockId());
 				newBlock.finalRoad = true;
 				hexa.finalR = true;
 				// Finally, remove all the extra blocks
@@ -308,7 +298,6 @@ public class GenerateMap : MonoBehaviour {
 	}
 	// Checks if there is road with some other id than the given one and returns that hexa.
 	private MapHexa isOtherRoadNearby(MapHexa hexa, int myRoadId) {
-		//Debug.Log ("asdf");
 		List <MapHexa.HexDir> directions = initDirections ();
 		if (hexa == null)
 			return null;
@@ -329,11 +318,7 @@ public class GenerateMap : MonoBehaviour {
     // there is no 3+ road chains
     private bool isRoadTooShort(Roads.Road road)
     {
-        //int nextRoadId = road.roadBlocks[road.roadBlocks.Count - 1].getNextRoadId();
-        //int nextRoadBlockId = road.roadBlocks[road.roadBlocks.Count - 1].getNextBlockId();
         Roads.Road.RoadBlock nextBlock = road.roadBlocks[road.roadBlocks.Count - 1].getNextRoadBlock();
-
-        //Debug.Log("Road count: " + road.roadBlocks.Count + " and getDistanceToEndOfRoad with id "+ nextRoadId+ " is: "+ mapData.getRoads().getDistanceToEndOfRoad(nextRoadId, nextRoadBlockId));
         if (road.roadBlocks.Count + mapData.getRoads().getDistanceToEndOfRoad(nextBlock.getRoadId(), nextBlock.getBlockId()) < roadMinLength)
         {
             return true;
@@ -364,13 +349,9 @@ public class GenerateMap : MonoBehaviour {
 				//Debug.Log ("End found");
 				newBlock = new Roads.Road.RoadBlock (hexa.getCoords (),id);
                 currentBlock.setNextRoadBlock(newBlock);
-				//currentBlock.setNextRoadId(road.roadId);
-				//currentBlock.setNextBlockId(newBlock.getBlockId());
 				road.addRoadBlock (newBlock);
 				newBlock.finalRoad = true;
-                newBlock.setNextRoadBlock(null); // TODO: end of road
-				//newBlock.setNextRoadId(Constants.RoadEndId);
-				//newBlock.setNextBlockId(Constants.RoadEndId);
+                newBlock.isLastBlock = true;
 				hexa.finalR = true;
 				return 1;
 			}
@@ -558,7 +539,7 @@ public class GenerateMap : MonoBehaviour {
 
 	// TODO: Create randomness
 	private void createRoadEnd() {
-		Roads.RoadEnd roadEnd = gameController.GetComponent<MapData>().getRoadEnd();
+		Roads.RoadEnd roadEnd = mapData.getRoadEnd();
 		roadEnd.setEndPos( Roads.RoadEnd.EndPositions.East);
 		MapHexa.Coordinate coords;
 		coords.hexaId = columns-2;

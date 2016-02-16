@@ -26,6 +26,7 @@ public class Roads {
 			public MapHexa.HexDir roadDirection;
 
 			public bool finalRoad=false; // Only used in creation of road
+            public bool isLastBlock = false;
             
             private RoadBlockData thisRoadBlock;
             // Next block in the road. Enemies can use this to move
@@ -204,6 +205,7 @@ public class Roads {
 
 		private MapHexa.Coordinate endCoordinate;
 		private EndPositions endPos;
+        private GameObject endHexa;
 
 		public void setEndPos (EndPositions end) {
 			Debug.Log ("Setting endposition to "+end);
@@ -224,6 +226,12 @@ public class Roads {
 			RowList rows=gameController.GetComponent<MapData> ().getRowList ();
 			rows [coords.rowId].GetComponent<MapRow> ().getHexagon (coords.hexaId).GetComponent<MapHexa> ().setType(MapHexa.HexType.End);
 			endCoordinate = coords;
-		}
+            endHexa = gameController.GetComponent<MapData>().getHexa(coords);
+        }
+
+        public GameObject getEndHexa()
+        {
+            return endHexa;
+        }
 	}
 }

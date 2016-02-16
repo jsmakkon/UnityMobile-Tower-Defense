@@ -36,18 +36,48 @@ public class EnemyMovement : MonoBehaviour {
         //zSpeed = GetComponent<Rigidbody>().velocity.z;
         if (isTargetPointNear(currentTarget.transform.position))
         {
-            int roadid = currentTarget.GetComponent<MapHexa>().roadBlock.getRoadId();
-            int blockid = currentTarget.GetComponent<MapHexa>().roadBlock.getBlockId();
-            currentTarget = mapData.getNextHexaInRoad(roadid, blockid);
+            // Move to end if lastblock
+            if (currentTarget.GetComponent<MapHexa>().roadBlock.isLastBlock)
+            {
+                currentTarget = mapData.getRoadEnd().getEndHexa();
+            }
+            else // Else go to next block normally
+            {
+                setNextHexa();
+                //int roadid = currentTarget.GetComponent<MapHexa>().roadBlock.getRoadId();
+               // int blockid = currentTarget.GetComponent<MapHexa>().roadBlock.getBlockId();
+                //currentTarget = mapData.getNextHexaInRoad(roadid, blockid);
+            }
             setVelocity();
+
 
         }
 	}
 
+    public void setNewRoadPosition(GameObject target)
+    {
+        if (target.GetComponent<MapHexa>().roadBlock == null)
+        {
+            Debug.LogWarning("setNewRoadPosition warning: target not on the road!");
+            return;
+        }
+        transform.position = new Vector3(target.transform.position.x, target.transform.position.y, -1.1f);
+        currentTarget = target;
+        setNextHexa();
+        
+    }
+    
+    private void setNextHexa()
+    {
+        int roadid = currentTarget.GetComponent<MapHexa>().roadBlock.getRoadId();
+        int blockid = currentTarget.GetComponent<MapHexa>().roadBlock.getBlockId();
+        currentTarget = mapData.getNextHexaInRoad(roadid, blockid);
+    }
+
     private void setVelocity()
     {
         GetComponent<Rigidbody>().velocity = (currentTarget.transform.position - transform.position).normalized * enemyScript.Speed;
-        Debug.Log("EnemySpeed " + enemyScript.Speed);
+        //Debug.Log("EnemySpeed " + enemyScript.Speed);
         GetComponent<Rigidbody>().velocity = new Vector3(GetComponent<Rigidbody>().velocity.x,
             GetComponent<Rigidbody>().velocity.y,
             0.0f);
