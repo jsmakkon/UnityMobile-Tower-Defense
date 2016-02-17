@@ -37,4 +37,12 @@ public class CameraButtons : MonoBehaviour {
     {
         gameController.GetComponent<MapData>().SpawnEnemyToRoad(0);
     }
+
+    public void CreateTower()
+    {
+        MapData mapData = gameController.GetComponent<MapData>();
+        int x = GameObject.Find("TempDebug").GetComponent<TempTestScript>().X;
+        int y = GameObject.Find("TempDebug").GetComponent<TempTestScript>().Y;
+        mapData.SpawnTower(x,y);
+    }
 }

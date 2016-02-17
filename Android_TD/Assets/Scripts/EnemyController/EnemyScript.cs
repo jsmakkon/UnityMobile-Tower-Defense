@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public class EnemyScript : MonoBehaviour {
 
@@ -42,18 +43,36 @@ public class EnemyScript : MonoBehaviour {
 		public float physical;
 		public float magic;
 	}
-	public static Object enemyPrefab = Resources.Load("EnemyPrefab", typeof(GameObject));
+	public static GameObject enemyPrefab = (GameObject)Resources.Load("EnemyPrefab", typeof(GameObject));
 
-    public int enemyID;
+    public static GameObject enemiesGroup;
+
+    public static int ID = 0;
+
+    private int enemyID;
 	public string enemyName;
 	public EnemyStats stats;
 	public EnemyResistances resistances;
 	public List<StatusEffect> statusEffects = new List<StatusEffect>();
 	// TODO: add rest of the variables
 
+    void Awake()
+    {
+        enemiesGroup = GameObject.Find("Enemies");
+    }
+
+    void Start()
+    {
+
+    }
+
 	// Use this to create enemy TODO: add animation to spawning here
 	public static EnemyScript CreateEnemy(EnemyType type, GameObject startPosition, GameObject nextBlock) {
 		GameObject newObject = (GameObject)Instantiate(enemyPrefab);
+        newObject.transform.SetParent(enemiesGroup.transform);
+        newObject.name = "Enemy " + ID;
+        newObject.GetComponent<EnemyScript>().setEnemyId(ID);
+        ID++;
 		EnemyScript script = newObject.GetComponent<EnemyScript>();
 		// Specific settings for different enemy types TODO
 		switch (type) {
@@ -70,7 +89,16 @@ public class EnemyScript : MonoBehaviour {
         return script;
 	}
 
-	private void setBasicEnemy() {
+    private void setEnemyId(int id)
+    {
+        enemyID = id;
+    }
+
+    private int getEnemyId()
+    {
+        return enemyID;
+    }
+    private void setBasicEnemy() {
 		enemyName = "Basic Soldier";
 		stats.hp = 100;
 		stats.strength = 1;
@@ -80,12 +108,7 @@ public class EnemyScript : MonoBehaviour {
 		resistances.magic = 0;
 
 	}
-
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
+    
 	// Update is called once per frame
 	void Update () {
 	

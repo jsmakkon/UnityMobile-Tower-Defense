@@ -59,6 +59,14 @@ public class MapData : MonoBehaviour {
 		return null;
 	}
 
+    public GameObject getHexa(int row, int hexa)
+    {
+        MapHexa.Coordinate coords;
+        coords.rowId = row;
+        coords.hexaId = hexa;
+        return getHexa(coords);
+    }
+
     public GameObject getNextHexaInRoad(int roadId, int blockId)
     {
         //int nextBlockid = roads.getRoad(roadId).getRoadBlock(blockId).getNextBlockId();
@@ -81,6 +89,12 @@ public class MapData : MonoBehaviour {
         int secondBlockId = roads.getRoad(roadId).getRoadBlockByIndex(0).getNextRoadBlock().getBlockId();
 
         EnemyScript.CreateEnemy(EnemyScript.EnemyType.Basic, getRoadHexa(roadId, firstBlockId), getRoadHexa(roadId, secondBlockId));
+    }
+
+    public void SpawnTower(int row, int hexa)
+    {
+        GameObject hex = getHexa(row, hexa);
+        TowerScript.CreateTower(hex.transform.position);
     }
 
 
