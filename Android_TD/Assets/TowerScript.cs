@@ -35,7 +35,7 @@ public class TowerScript : MonoBehaviour {
             // TODO: Handle second trigger differently
             if (targetsInArea.Contains(other.gameObject))
                 return;
-            Debug.Log("OnTrigEnter");
+            //Debug.Log("OnTrigEnter");
             targetsInArea.Add(other.gameObject);
             if (shootTarget == null)
             {
@@ -52,7 +52,7 @@ public class TowerScript : MonoBehaviour {
             // TODO: Handle second trigger differently
             if (!targetsInArea.Contains(other.gameObject))
                 return;
-            Debug.Log("OnTrigExit");
+            //Debug.Log("OnTrigExit");
             targetsInArea.Remove(other.gameObject);
             if (other.gameObject == shootTarget)
             {
@@ -65,14 +65,17 @@ public class TowerScript : MonoBehaviour {
                 }
                     
             }
-            InvokeRepeating("ShootTarget", 0.5f, 1.0f);
+            //InvokeRepeating("ShootTarget", 0.5f, 1.0f);
         }
     }
 
     void ShootTarget()
     {
         if (shootTarget != null)
-            Debug.Log("Shooting" + shootTarget.name);
+        {
+            //Debug.Log("Shooting" + shootTarget.name);
+            ProjectileScript.CreateProjectile(transform.position,shootTarget);
+        }
         else
         {
             // Target is destroyed

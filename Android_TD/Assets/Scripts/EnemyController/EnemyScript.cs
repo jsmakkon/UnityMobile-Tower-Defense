@@ -71,16 +71,16 @@ public class EnemyScript : MonoBehaviour {
 		GameObject newObject = (GameObject)Instantiate(enemyPrefab);
         newObject.transform.SetParent(enemiesGroup.transform);
         newObject.name = "Enemy " + ID;
-        newObject.GetComponent<EnemyScript>().setEnemyId(ID);
+        newObject.GetComponent<EnemyScript>().SetEnemyId(ID);
         ID++;
 		EnemyScript script = newObject.GetComponent<EnemyScript>();
 		// Specific settings for different enemy types TODO
 		switch (type) {
 		case EnemyType.Basic:
-			script.setBasicEnemy ();
+			script.SetBasicEnemy ();
 			break;
 		default:
-			script.setBasicEnemy ();
+			script.SetBasicEnemy ();
 			Debug.Log ("Set Basic enemy in case Default");
 			break;
 		}
@@ -89,16 +89,16 @@ public class EnemyScript : MonoBehaviour {
         return script;
 	}
 
-    private void setEnemyId(int id)
+    private void SetEnemyId(int id)
     {
         enemyID = id;
     }
 
-    private int getEnemyId()
+    private int GetEnemyId()
     {
         return enemyID;
     }
-    private void setBasicEnemy() {
+    private void SetBasicEnemy() {
 		enemyName = "Basic Soldier";
 		stats.hp = 100;
 		stats.strength = 1;
@@ -109,6 +109,11 @@ public class EnemyScript : MonoBehaviour {
 
 	}
     
+    public void TakeDamage()
+    {
+        Destroy(gameObject);
+    }
+
 	// Update is called once per frame
 	void Update () {
 	
