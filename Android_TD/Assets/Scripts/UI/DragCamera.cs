@@ -19,16 +19,16 @@ public class DragCamera : MonoBehaviour {
 			//slideCamera ();
 			//for (Touch touch
 			//Debug.Log("CameraDragging = " + cameraDragging);
-			slideCamera();
+			//slideCamera();
 		}
 	}
 
 	void slideCamera() {
-		Debug.Log ("Slide cameran sisällä");
+		//Debug.Log ("Slide cameran sisällä");
 		Vector3 touchDeltaPosition = Input.GetTouch(0).deltaPosition;
 		//Vector3 newPosition = -touchDeltaPosition - dragOrigin;
-		Debug.Log ("touchDeltaposition = " + touchDeltaPosition);
-		Debug.Log ("dragorigin = " + dragOrigin);
+		//Debug.Log ("touchDeltaposition = " + touchDeltaPosition);
+		//Debug.Log ("dragorigin = " + dragOrigin);
 		//Debug.Log ("newposition = " + newPosition);
 		gameObject.transform.Translate (-touchDeltaPosition * dragSpeed);
 
@@ -40,6 +40,6 @@ public class DragCamera : MonoBehaviour {
 
 	public void setDragOrigin(Vector3 startDragPos) {
 		dragOrigin = startDragPos;
-		Debug.Log ("dragOrigin = " + dragOrigin);
+		//Debug.Log ("dragOrigin = " + dragOrigin);
 	}
 }

@@ -22,6 +22,8 @@ public class MapHexa : MonoBehaviour {
 	public int rbid;
 	public bool finalR=false;
 
+    public 
+
 	void Awake() {
 		hexType = HexType.Grass;
 		roadBlock = null;
