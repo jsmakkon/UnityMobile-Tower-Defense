@@ -10,8 +10,11 @@ public class TowerScript : MonoBehaviour {
 
     public GameObject shootTarget;
 
+    private float nextShot = 0.0f;
+
     public List<GameObject> targetsInArea;
 
+    public float firingCooldown = 1.0f;
 	// Use this for initialization
 	void Awake () {
         gameController = GameObject.Find("GameController");
@@ -40,7 +43,7 @@ public class TowerScript : MonoBehaviour {
             if (shootTarget == null)
             {
                 shootTarget = other.gameObject;
-                InvokeRepeating("ShootTarget", 0.5f, 1.0f);
+                //InvokeRepeating("ShootTarget", 0.5f, 1.0f);
             }
         }
     }
@@ -49,23 +52,20 @@ public class TowerScript : MonoBehaviour {
     {
         if (other.gameObject.transform.parent.name == "Enemies")
         {
-            // TODO: Handle second trigger differently
             if (!targetsInArea.Contains(other.gameObject))
                 return;
-            //Debug.Log("OnTrigExit");
             targetsInArea.Remove(other.gameObject);
             if (other.gameObject == shootTarget)
             {
+                // Set new target here
                 if (targetsInArea.Count != 0)
                     shootTarget = targetsInArea[targetsInArea.Count - 1];
-                else
+                /*else
                 {
                     shootTarget = null;
                     CancelShooting();
-                }
-                    
+                }*/
             }
-            //InvokeRepeating("ShootTarget", 0.5f, 1.0f);
         }
     }
 
@@ -73,9 +73,9 @@ public class TowerScript : MonoBehaviour {
     {
         if (shootTarget != null)
         {
-            //Debug.Log("Shooting" + shootTarget.name);
-            ProjectileScript.CreateProjectile(transform.position,shootTarget);
+            ProjectileScript.CreateProjectile(transform.position, shootTarget);
         }
+        /*
         else
         {
             // Target is destroyed
@@ -86,11 +86,24 @@ public class TowerScript : MonoBehaviour {
                 shootTarget = null;
                 CancelShooting();
             }
-        }
+        }*/
     }
-    
+    /*
     public void CancelShooting()
     {
         CancelInvoke("ShootTarget");
+    }*/
+
+    void Update()
+    {
+        if (shootTarget == null && targetsInArea.Count != 0)
+        {
+            shootTarget = targetsInArea[targetsInArea.Count - 1];
+        }
+        if (Time.time > nextShot && shootTarget != null)
+        {
+            ShootTarget();
+            nextShot = Time.time + firingCooldown;
+        }
     }
 }

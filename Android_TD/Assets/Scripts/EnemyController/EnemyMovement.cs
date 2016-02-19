@@ -25,8 +25,8 @@ public class EnemyMovement : MonoBehaviour {
         currentTarget = nextTarget;
         transform.position = new Vector3(startPoint.x, startPoint.y, -1.1f);
         setVelocity();
-        Debug.Log("Set speed to: " + GetComponent<Rigidbody>().velocity);
-        Debug.Log("Pos of target: " + currentTarget.transform.position + " and our pos: " + transform.position);
+        //Debug.Log("Set speed to: " + GetComponent<Rigidbody>().velocity);
+        //Debug.Log("Pos of target: " + currentTarget.transform.position + " and our pos: " + transform.position);
     }
 
 	// Update is called once per frame

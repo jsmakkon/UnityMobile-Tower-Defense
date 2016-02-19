@@ -112,6 +112,7 @@ public class EnemyScript : MonoBehaviour {
     public void TakeDamage()
     {
         Destroy(gameObject);
+       // Debug.Log("I died");
     }
 
 	// Update is called once per frame

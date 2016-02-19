@@ -10,6 +10,7 @@ public class ProjectileScript : MonoBehaviour {
     public GameObject currentTarget;
 
     public float projectileSpeed = 5.0f;
+    private bool isDisabled = false;
 
     void Awake()
     {
@@ -50,7 +51,9 @@ public class ProjectileScript : MonoBehaviour {
        
         if (other.gameObject.transform.parent.name == "Enemies")
         {
-            Debug.Log("Projectile OnTriggerEnter: " + other.gameObject.transform.parent.name);
+            //Debug.Log("I d");
+            //enabled = false;
+            isDisabled = true;
             Destroy(gameObject);
             other.gameObject.GetComponent<EnemyScript>().TakeDamage();
         }
