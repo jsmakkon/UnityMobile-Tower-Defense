@@ -17,9 +17,11 @@ public class TouchDetection : MonoBehaviour {
     float touchTime = 0;
 	//Change the time touch is defined as a tap
 	public float tapTime = 0.5f;
+    public float moveTime = 0.3f;
 
 	Vector3 startDragPos;
 
+    private bool isMoved = false;
 	// Use this for initialization
 	void Start () {
 	
@@ -32,9 +34,9 @@ public class TouchDetection : MonoBehaviour {
 		if (numTouches > 0)
 		{
 
-			for (int i = 0; i < numTouches; i++)
-			{
-				Touch touch = Input.GetTouch(i);
+			//for (int i = 0; i < numTouches; i++)
+			//{
+				Touch touch = Input.GetTouch(0);
 				TouchPhase phase = touch.phase;
 
 				//Checks that number of touches is 1
@@ -45,34 +47,33 @@ public class TouchDetection : MonoBehaviour {
 					case TouchPhase.Began:
 						//Check when the touch began
 						touchTime = Time.time;
-						startDragPos = touch.position;
-						break;
+						//startDragPos = touch.position;
+                        cameraObject.GetComponent<DragCamera>().setDragOriginTouch(touch);
+                        break;
 					case TouchPhase.Ended:
 						// This checks if touch was a TAP
-						if (Time.time - touchTime <= tapTime)
+						if (Time.time - touchTime <= tapTime && !isMoved)
 						{
 							Debug.Log("tap");
 							character.GetComponent<CharacterMovement> ().setFlagTrue ();
 						}
 						// This checks if touch was a LONG PRESS
-						else
+						else if (!isMoved)
 						{
 							Debug.Log("Long press");
-                            
-                            
-                                //Create a ray on the tapped position
+                                
+                                //Select a hexa on map and change its material
                                 Ray ray;
                                 ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
                                 RaycastHit[] hits;
-                                //hits = Physics.RaycastAll(transform.position, transform.forward, 100.0F);
+
                                 hits = Physics.RaycastAll(ray,200.0f);
                                 Debug.Log("Hits count: " + hits.Length);
                                 for(int j = 0; j < hits.Length; j++)
                                 {
-                                    //Declare a variable of Raycasthit struct
+
                                     RaycastHit hit = hits[j];
                                     Debug.Log("Touched object: " + hit.collider.gameObject.name);
-                                    //hit.collider.gameObject.transform.parent.parent.name == "Map";
                                     Renderer rend = hit.transform.GetComponent<Renderer>();
 
                                     if (hit.collider.gameObject.transform.parent.parent.name == "Map")
@@ -87,30 +88,26 @@ public class TouchDetection : MonoBehaviour {
                                             rend.material = tappedMaterial;
                                     }
                                 }
-
-
-
-
-                                //Set the flag as true and get the endpoint
-                                /*   if (Physics.Raycast(ray, out hit))
-                                   {
-                                      // flag = true;
-                                       placeOfTap = hit.point;
-                                       placeOfTap.z = zAxis;
-                                       print("endPoint");
-                                   }*/
                             }
+                        isMoved = false;
 						break;
 					case TouchPhase.Moved:
+                        if (Time.time - touchTime >= moveTime)
+                        {
+                            isMoved = true;
+                            //Check for camera slide
+                            cameraObject.GetComponent<DragCamera>().setCurrentTouch(touch);
+                            //cameraObject.GetComponent<DragCamera> ().setDragOrigin (startDragPos);
+                            //cameraObject.GetComponent<DragCamera> ().setCameraDragTrue ();
+                            cameraObject.GetComponent<DragCamera>().slideCamera();
+                            cameraObject.GetComponent<DragCamera>().setDragOriginTouch(touch);
 
-						//Debug.Log ("Inside TouchPhase.Moved");
-						cameraObject.GetComponent<DragCamera> ().setDragOrigin (startDragPos);
-						cameraObject.GetComponent<DragCamera> ().setCameraDragTrue ();
-						break;
+                        }
+                        break;
 
 					}
 				}
 			}
 		}
-	}
+	//}
 }
