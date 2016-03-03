@@ -4,7 +4,9 @@ using System.Collections.Generic;
 
 public class MapHexa : MonoBehaviour {
 
-	public enum HexDir{W, NW, NE, E, SE, SW};
+    GameObject selecter;
+
+    public enum HexDir{W, NW, NE, E, SE, SW};
 
 	public enum HexType{Grass, Road, Mountain,End};
 
@@ -30,7 +32,8 @@ public class MapHexa : MonoBehaviour {
 		roadBlock = null;
 		setTexture (0);
 		gameController = GameObject.Find ("GameController");
-	}
+        selecter = GameObject.Find("Select_Highlight");
+    }
 
 	public int getParentRowId() {
 		return transform.GetComponentInParent<MapRow> ().rowID;
@@ -158,11 +161,10 @@ public class MapHexa : MonoBehaviour {
     {
         //TODO: better..
         isSelected = select;
-        GameObject selecter = GameObject.Find("Select_Highlight"); // TODO: Move to awake
         if (select)
             selecter.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z-0.1f);            
         else
-            selecter.transform.position = new Vector3(-15,10,10);
+            selecter.transform.position = Constants.posBehindCamera;
     }
 
     public bool getSelected()

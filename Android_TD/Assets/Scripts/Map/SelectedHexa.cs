@@ -26,4 +26,9 @@ public class SelectedHexa : MonoBehaviour {
             obj.GetComponent<MapHexa>().setSelected(true);
         }
     }
+
+    public GameObject getSelected()
+    {
+        return selectedHexa;
+    }
 }

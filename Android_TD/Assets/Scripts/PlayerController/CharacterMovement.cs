@@ -28,7 +28,6 @@ public class CharacterMovement : MonoBehaviour {
         else if (flag && Mathf.Approximately(gameObject.transform.position.magnitude, endPoint.magnitude))
         {
             flag = false;
-            print("I am here");
         }
     }
 
@@ -53,7 +52,7 @@ public class CharacterMovement : MonoBehaviour {
 			flag = true;
 			endPoint = hit.point;
 			endPoint.z = zAxis;
-			print ("endPoint");
+			//print ("endPoint");
 		}
 	}
 }

@@ -7,8 +7,11 @@ public class TowerScript : MonoBehaviour {
     GameObject gameController;
     public static GameObject towerPrefab = (GameObject)Resources.Load("TowerPrefab", typeof(GameObject));
     public static GameObject towerParent;
+    
 
     public GameObject shootTarget;
+
+    private GameObject hexa;
 
     private float nextShot = 0.0f;
 
@@ -23,11 +26,33 @@ public class TowerScript : MonoBehaviour {
         targetsInArea = new List<GameObject>();
     }
 
-    public static void CreateTower(Vector3 position)
+    public static bool CreateTower(GameObject mapHexa)
     {
-        Vector3 newPos = new Vector3(position.x, position.y,Constants.towerDepth);
-        GameObject newObject = (GameObject)Instantiate(towerPrefab,newPos,towerPrefab.transform.rotation);
-        newObject.transform.SetParent(towerParent.transform);
+        GameObject towerP = GameObject.Find("Towers");
+        MapHexa.Coordinate coords = mapHexa.GetComponent<MapHexa>().getCoords();
+        if (towerP.GetComponent<TowerParentScript>().isSpotFree(coords.rowId, coords.hexaId))
+        {
+            Debug.Log("hoi2");
+            Vector3 newPos = new Vector3(mapHexa.transform.position.x, mapHexa.transform.position.y, Constants.towerDepth);
+            GameObject newObject = (GameObject)Instantiate(towerPrefab, newPos, towerPrefab.transform.rotation);
+            
+            newObject.GetComponent<TowerScript>().setMapHexa(mapHexa);
+            newObject.transform.SetParent(towerParent.transform);
+            towerParent.GetComponent<TowerParentScript>().setTowerToSpot(coords, newObject);
+            return true;
+        }
+        Debug.Log("Tower creation failed");
+        return false;
+    }
+
+    public void setMapHexa(GameObject mapHexa)
+    {
+        hexa = mapHexa;
+    }
+
+    public GameObject setMapHexa()
+    {
+        return hexa;
     }
 
     void OnTriggerEnter(Collider other)

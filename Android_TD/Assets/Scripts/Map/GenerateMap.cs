@@ -12,11 +12,9 @@ public class GenerateMap : MonoBehaviour {
 	public GameObject gameController;
 
 	private MapData mapData;
+    
 
-	public static int rows = 18;
-	public static int columns = 25;
-
-	public int numOfRoadStarts = 3;
+    public int numOfRoadStarts = 3;
 
 	private float wDist = 1.73205f;
 
@@ -31,6 +29,7 @@ public class GenerateMap : MonoBehaviour {
 	}
 	void Start () {
         // TODO: Check if we have given seed (Playerprefs..)
+        // TODO: Call this from MapData (Start everything from mapdata)
         generateMap();
 		
 	}
@@ -78,7 +77,7 @@ public class GenerateMap : MonoBehaviour {
 		}
 
 		// Create rows and hexagons
-		for (int i = 0; i < rows; i++){
+		for (int i = 0; i < MapData.rows; i++){
 			
 			if (i % 2 == 0) {
 				position = new Vector3 (0.0f, i * rowH, 0.0f);
@@ -96,7 +95,7 @@ public class GenerateMap : MonoBehaviour {
 			row.GetComponent<MapRow> ().offSetRow = offsetRowFlag;
 			rowIDs++;
 			// Add hexagons with id 0,1,2,3,4... column - 1.
-			for (int a = 0; a < columns; a++) {
+			for (int a = 0; a < MapData.columns; a++) {
 				row.GetComponent<MapRow> ().AddHex (row, a, a*wDist,0,0);
 			}
 			rowList.Add (row);
@@ -106,7 +105,7 @@ public class GenerateMap : MonoBehaviour {
 
 
     private int generateRoads() {
-        Roads.RoadEnd roadEnd = mapData.getRoadEnd();
+        //Roads.RoadEnd roadEnd = mapData.getRoadEnd();
 
         // Generate road starting hexas
         // TODO: get number of roads from playerprefs
@@ -257,8 +256,6 @@ public class GenerateMap : MonoBehaviour {
 			// Else we have to continue if we can reach the end from here
 		}
 		// If we fail at this point, clean made block and return to previous block
-		//Debug.Break();
-
 		return 0;
 	}
 	// Checks if there is road with some other id than the given one and returns that hexa.
@@ -397,7 +394,7 @@ public class GenerateMap : MonoBehaviour {
 	}
 
 	public bool isHexaAtTheEdge(MapHexa.Coordinate hexCoords) {
-		if (hexCoords.hexaId == 0 || hexCoords.hexaId == columns - 1 || hexCoords.rowId == 0 || hexCoords.rowId == rows - 1)
+		if (hexCoords.hexaId == 0 || hexCoords.hexaId == MapData.columns - 1 || hexCoords.rowId == 0 || hexCoords.rowId == MapData.rows - 1)
 			return true;
 		else
 			return false;
@@ -496,8 +493,8 @@ public class GenerateMap : MonoBehaviour {
 		Roads.RoadEnd roadEnd = mapData.getRoadEnd();
 		roadEnd.setEndPos( Roads.RoadEnd.EndPositions.East);
 		MapHexa.Coordinate coords;
-		coords.hexaId = columns-2;
-		coords.rowId = rows - 2;
+		coords.hexaId = MapData.columns -2;
+		coords.rowId = MapData.rows - 2;
 		roadEnd.setCoords (coords);
 	}
 
@@ -514,35 +511,35 @@ public class GenerateMap : MonoBehaviour {
         {
             case Roads.RoadEnd.EndPositions.East:
                 coords1.hexaId = 0;
-                coords1.rowId = Random.Range(1, rows - 1);
+                coords1.rowId = Random.Range(1, MapData.rows - 1);
                 list.Add(coords1);
                 if (count > 1)
                 {
                     coords2.rowId = 0;
-                    coords2.hexaId = Random.Range(1, columns - 5);
+                    coords2.hexaId = Random.Range(1, MapData.columns - 5);
                     list.Add(coords2);
                 }
                 if (count > 2)
                 {
-                    coords3.rowId = rows - 1;
-                    coords3.hexaId = Random.Range(1, columns - 5);
+                    coords3.rowId = MapData.rows - 1;
+                    coords3.hexaId = Random.Range(1, MapData.columns - 5);
                     list.Add(coords3);
                 }
                 break;
             case Roads.RoadEnd.EndPositions.West:
-                coords1.hexaId = columns;
-                coords1.rowId = Random.Range(1, rows - 1);
+                coords1.hexaId = MapData.columns;
+                coords1.rowId = Random.Range(1, MapData.rows - 1);
                 list.Add(coords1);
                 if (count > 1)
                 {
                     coords2.rowId = 0;
-                    coords2.hexaId = Random.Range(5, columns - 1);
+                    coords2.hexaId = Random.Range(5, MapData.columns - 1);
                     list.Add(coords2);
                 }
                 if (count > 2)
                 {
-                    coords3.rowId = rows - 1;
-                    coords3.hexaId = Random.Range(5, columns - 1);
+                    coords3.rowId = MapData.rows - 1;
+                    coords3.hexaId = Random.Range(5, MapData.columns - 1);
                     list.Add(coords3);
                 }
                 break;
@@ -550,18 +547,18 @@ public class GenerateMap : MonoBehaviour {
                 // Default at East
                 Debug.LogWarning("RoadEnd endpos default proc: value is " + roadEnd.getEndPos());
                 coords1.hexaId = 0;
-                coords1.rowId = Random.Range(1, rows - 1);
+                coords1.rowId = Random.Range(1, MapData.rows - 1);
                 list.Add(coords1);
                 if (count > 1)
                 {
                     coords2.rowId = 0;
-                    coords2.hexaId = Random.Range(1, columns - 5);
+                    coords2.hexaId = Random.Range(1, MapData.columns - 5);
                     list.Add(coords2);
                 }
                 if (count > 2)
                 {
-                    coords3.rowId = rows - 1;
-                    coords3.hexaId = Random.Range(1, columns - 5);
+                    coords3.rowId = MapData.rows - 1;
+                    coords3.hexaId = Random.Range(1, MapData.columns - 5);
                     list.Add(coords3);
                 }
                 break;

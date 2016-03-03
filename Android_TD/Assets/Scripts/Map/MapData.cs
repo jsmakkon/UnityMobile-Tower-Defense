@@ -15,9 +15,10 @@ public class MapData : MonoBehaviour {
 	private Roads roads; // Roads 
 	private Roads.RoadEnd roadEnd; // End of the road
 
-    public int testingSave;
+    public static int rows = 18;
+    public static int columns = 25;
 
-    private GameObject selectedHexa = null;
+    public int testingSave;
 
 	void Awake() {
 		//inits
@@ -71,8 +72,6 @@ public class MapData : MonoBehaviour {
 
     public GameObject getNextHexaInRoad(int roadId, int blockId)
     {
-        //int nextBlockid = roads.getRoad(roadId).getRoadBlock(blockId).getNextBlockId();
-        //int nextBlockRoadId = roads.getRoad(roadId).getRoadBlock(blockId).getNextRoadId();
         Roads.Road.RoadBlock nextBlock = roads.getRoad(roadId).roadBlocks[blockId].getNextRoadBlock();
         MapHexa.Coordinate nextCoords = nextBlock.coord;
         return getHexa(nextCoords);
@@ -93,10 +92,17 @@ public class MapData : MonoBehaviour {
         EnemyScript.CreateEnemy(EnemyScript.EnemyType.Basic, getRoadHexa(roadId, firstBlockId), getRoadHexa(roadId, secondBlockId));
     }
 
-    public void SpawnTower(int row, int hexa)
+    public void SpawnTower(int row, int column)
     {
-        GameObject hex = getHexa(row, hexa);
-        TowerScript.CreateTower(hex.transform.position);
+        GameObject hex = getHexa(row, column);
+        TowerScript.CreateTower(hex);
+    }
+    public void SpawnTower(GameObject hexa)
+    {
+        if (hexa.tag == "MapHexa")
+        {
+            TowerScript.CreateTower(hexa);
+        }
     }
 
     public void setHexaType(int row, int hexa, MapHexa.HexType type)

@@ -3,6 +3,7 @@ using System.Collections;
 
 public class CameraButtons : MonoBehaviour {
     public GameObject gameController;
+    public GameObject selected;
     /*
 	public void OnClick() {
 		Debug.Log("Transform tag is: " + transform.tag);
@@ -14,6 +15,11 @@ public class CameraButtons : MonoBehaviour {
 		}
 	}
 	*/
+    void Awake()
+    {
+        selected = GameObject.Find("Select_Highlight");
+    }
+
     public void LiftCamera() {
 		// TODO: add maximums
 		Camera.main.orthographicSize = Camera.main.orthographicSize + 5;
@@ -41,8 +47,12 @@ public class CameraButtons : MonoBehaviour {
     public void CreateTower()
     {
         MapData mapData = gameController.GetComponent<MapData>();
-        int x = GameObject.Find("TempDebug").GetComponent<TempTestScript>().X;
-        int y = GameObject.Find("TempDebug").GetComponent<TempTestScript>().Y;
-        mapData.SpawnTower(x,y);
+        GameObject sel = selected.GetComponent<SelectedHexa>().getSelected();
+        if (sel != null)
+        {
+            Debug.Log("selected not null");
+            mapData.SpawnTower(sel);
+        }
+        
     }
 }
