@@ -13,16 +13,17 @@ public class MapHexa : MonoBehaviour {
 		public int hexaId;
 	}
 
+    private bool isSelected = false;
+
 	//[HideInInspector] 
 	public int hexaID;
 	public List<Material> materials;
 	private HexType hexType;
 	public GameObject gameController;
 	public Roads.Road.RoadBlock roadBlock; // Links hexas to their appropriate roadBlock
-	public int rbid;
-	public bool finalR=false;
+	public int rbid; // For debug?
 
-    public 
+	public bool finalR=false; // for map generation
 
 	void Awake() {
 		hexType = HexType.Grass;
@@ -65,10 +66,11 @@ public class MapHexa : MonoBehaviour {
 		return coord;
 	}
 
-	public void getIds(ref int hexId, ref int rowId) {
-		hexId = hexaID;
-		rowId = getParentRowId ();
-	}
+    public void getIds(ref int hexId, ref int rowId)
+    {
+        hexId = hexaID;
+        rowId = getParentRowId();
+    }
 
 	private GameObject getNWNeighbour() {
 		int row = getParentRowId () - 1;
@@ -151,4 +153,20 @@ public class MapHexa : MonoBehaviour {
 			break;
 		}
 	}
+
+    public void setSelected(bool select)
+    {
+        //TODO: better..
+        isSelected = select;
+        GameObject selecter = GameObject.Find("Select_Highlight"); // TODO: Move to awake
+        if (select)
+            selecter.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z-0.1f);            
+        else
+            selecter.transform.position = new Vector3(-15,10,10);
+    }
+
+    public bool getSelected()
+    {
+        return isSelected;
+    }
 }

@@ -4,8 +4,8 @@ using System.Collections.Generic;
 
 using RowList = System.Collections.Generic.List<UnityEngine.GameObject>;
 
-// Data holder class for map hexas, roads end of road. Also 
-// has functions to manipulate this data, create enemy..
+// Data holder class for map hexas, roads end of road. 
+// Works also as a interface to manipulate everything in a map
 
 public class MapData : MonoBehaviour {
 
@@ -16,6 +16,8 @@ public class MapData : MonoBehaviour {
 	private Roads.RoadEnd roadEnd; // End of the road
 
     public int testingSave;
+
+    private GameObject selectedHexa = null;
 
 	void Awake() {
 		//inits
@@ -97,5 +99,10 @@ public class MapData : MonoBehaviour {
         TowerScript.CreateTower(hex.transform.position);
     }
 
-
+    public void setHexaType(int row, int hexa, MapHexa.HexType type)
+    {
+        GameObject hex = getHexa(row, hexa);
+        hex.GetComponent<MapHexa>().setType(type);
+    }
+    
 }

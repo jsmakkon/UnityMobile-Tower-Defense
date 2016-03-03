@@ -4,6 +4,7 @@ using System.Collections;
 public class TouchDetection : MonoBehaviour {
 	public GameObject character;
 	public GameObject cameraObject;
+    public GameObject selecter;
     public Material tappedMaterial;
     public Material originalMaterial;
 
@@ -21,8 +22,16 @@ public class TouchDetection : MonoBehaviour {
 
 	Vector3 startDragPos;
 
+    public GameObject gameController;
+
     private bool isMoved = false;
 	// Use this for initialization
+    void Awake ()
+    {
+        gameController = GameObject.Find("GameController");
+        selecter = GameObject.Find("Select_Highlight");
+    }
+
 	void Start () {
 	
 	}
@@ -33,9 +42,6 @@ public class TouchDetection : MonoBehaviour {
 
 		if (numTouches > 0)
 		{
-
-			//for (int i = 0; i < numTouches; i++)
-			//{
 				Touch touch = Input.GetTouch(0);
 				TouchPhase phase = touch.phase;
 
@@ -56,9 +62,11 @@ public class TouchDetection : MonoBehaviour {
 						{
 							Debug.Log("tap");
 							character.GetComponent<CharacterMovement> ().setFlagTrue ();
+                            checkForTileTap();
+
 						}
 						// This checks if touch was a LONG PRESS
-						else if (!isMoved)
+						/*else if (!isMoved)
 						{
 							Debug.Log("Long press");
                                 
@@ -88,7 +96,7 @@ public class TouchDetection : MonoBehaviour {
                                             rend.material = tappedMaterial;
                                     }
                                 }
-                            }
+                            }*/
                         isMoved = false;
 						break;
 					case TouchPhase.Moved:
@@ -97,8 +105,6 @@ public class TouchDetection : MonoBehaviour {
                             isMoved = true;
                             //Check for camera slide
                             cameraObject.GetComponent<DragCamera>().setCurrentTouch(touch);
-                            //cameraObject.GetComponent<DragCamera> ().setDragOrigin (startDragPos);
-                            //cameraObject.GetComponent<DragCamera> ().setCameraDragTrue ();
                             cameraObject.GetComponent<DragCamera>().slideCamera();
                             cameraObject.GetComponent<DragCamera>().setDragOriginTouch(touch);
 
@@ -108,6 +114,20 @@ public class TouchDetection : MonoBehaviour {
 					}
 				}
 			}
-		}
+	}
 	//}
+
+    private void checkForTileTap()
+    {
+
+        Ray ray;
+        ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
+        RaycastHit hit; // Cast to layer 10
+        if (Physics.Raycast(ray, out hit, 100f, 1 << 10))
+        {
+            GameObject hitHexa = hit.transform.gameObject;
+            Debug.Log("Hit hexa in checkforTile: "+ hitHexa.name);
+            selecter.GetComponent<SelectedHexa>().switchSelectedHexa(hitHexa);
+        }
+    }
 }

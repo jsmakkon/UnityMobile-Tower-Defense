@@ -29,7 +29,6 @@ public class MapRow : MonoBehaviour {
 	// Get hexagon from this row.
 	// Complexity: Constant if hexas are in order, linear otherwise
 	public GameObject getHexagon(int id) {
-		//Debug.Log ("getHexagon with id: "+ id+" hexlist count "+hexList.Count);
 		if (id > hexList.Count-1 || id < 0)
 			return null;
 		if (hexList [id].GetComponent<MapHexa> ().hexaID == id) {

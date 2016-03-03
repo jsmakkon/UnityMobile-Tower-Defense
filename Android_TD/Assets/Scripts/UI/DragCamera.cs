@@ -26,7 +26,7 @@ public class DragCamera : MonoBehaviour {
     {
         RaycastHit hit;
         Physics.Raycast(Camera.main.ScreenPointToRay(screenPoint), out hit, 200.0f);
-        Debug.Log("Hit transform pos: "+hit.transform);
+        //Debug.Log("Hit transform pos: "+hit.transform);
         return hit.point;
     }
 
