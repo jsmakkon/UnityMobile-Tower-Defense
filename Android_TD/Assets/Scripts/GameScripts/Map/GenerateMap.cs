@@ -28,9 +28,7 @@ public class GenerateMap : MonoBehaviour {
 		mapData = gameController.GetComponent<MapData> ();
 	}
 	void Start () {
-        // TODO: Check if we have given seed (Playerprefs..)
-        // TODO: Call this from MapData (Start everything from mapdata)
-        generateMap();
+        //generateMap();
 		
 	}
     // Call this to (re)generate map, nothing else is needed here

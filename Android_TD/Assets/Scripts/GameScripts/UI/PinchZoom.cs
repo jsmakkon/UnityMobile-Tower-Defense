@@ -9,7 +9,7 @@ public class PinchZoom : MonoBehaviour {
 
     void Awake ()
     {
-        gameController = GameObject.Find("GameController");
+        //gameController = GameObject.Find("GameController");
     }
 
 	public void DoPinchZoom () {

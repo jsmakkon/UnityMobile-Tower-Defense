@@ -9,7 +9,8 @@ using RowList = System.Collections.Generic.List<UnityEngine.GameObject>;
 
 public class MapData : MonoBehaviour {
 
-	public GameObject gameController;
+    //public GameObject gameController;
+    public GameObject map;
 
 	private RowList rowList; // Hexagons, currently as gameobjectlist TODO: create class
 	private Roads roads; // Roads 
@@ -23,9 +24,22 @@ public class MapData : MonoBehaviour {
 	void Awake() {
 		//inits
 		rowList = new List<GameObject> ();
-		roadEnd = new Roads.RoadEnd (gameController);
+		roadEnd = new Roads.RoadEnd (this.gameObject);
 		roads = new Roads ();
 	}
+    // Starts map generation
+    void Start()
+    {
+        string seed = PlayerPrefs.GetString("GameSeed");
+        if (seed != "")
+        {
+            map.GetComponent<GenerateMap>().generateMap(int.Parse(seed));
+        }
+        else
+        {
+            map.GetComponent<GenerateMap>().generateMap();
+        }
+    }
 
 	public List<GameObject> getRowList() {
 		return rowList;
