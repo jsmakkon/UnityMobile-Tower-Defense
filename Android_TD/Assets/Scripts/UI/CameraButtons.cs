@@ -17,7 +17,7 @@ public class CameraButtons : MonoBehaviour {
 	*/
     void Awake()
     {
-        selected = GameObject.Find("Select_Highlight");
+        selected = GameObject.Find("MapHexaSelectHighlight");
     }
 
     public void LiftCamera() {

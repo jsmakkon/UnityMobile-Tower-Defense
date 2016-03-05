@@ -32,7 +32,7 @@ public class MapHexa : MonoBehaviour {
 		roadBlock = null;
 		setTexture (0);
 		gameController = GameObject.Find ("GameController");
-        selecter = GameObject.Find("Select_Highlight");
+        selecter = GameObject.Find("MapHexaSelectHighlight");
     }
 
 	public int getParentRowId() {

@@ -20,70 +20,85 @@ public class TouchDetection : MonoBehaviour {
 
     public GameObject gameController;
 
+    private bool twoTouchMode = false;
     private bool isMoved = false;
+
 	// Use this for initialization
     void Awake ()
     {
         gameController = GameObject.Find("GameController");
-        selecter = GameObject.Find("Select_Highlight");
+        selecter = GameObject.Find("MapHexaSelectHighlight");
     }
 	
 	// Update is called once per frame
 	void Update () {
 		int numTouches = Input.touchCount;
 
+        if (numTouches == 0)
+            twoTouchMode = false;
+         
 		if (numTouches > 0)
 		{
-				Touch touch = Input.GetTouch(0);
-				TouchPhase phase = touch.phase;
+            // Don't do anything if we are zooming
+            if (numTouches >= 2)
+            {
+                twoTouchMode = true;
+                gameController.GetComponent<PinchZoom>().DoPinchZoom();
+                return;
+            }
 
-				//Checks that number of touches is 1
-				if (numTouches == 1)
+            Touch touch = Input.GetTouch(0);
+			TouchPhase phase = touch.phase;
+
+            
+			//Checks that number of touches is 1
+			if (numTouches == 1 && !twoTouchMode)
+			{
+				switch (phase)
 				{
-					switch (phase)
-					{
-					case TouchPhase.Began:
+				case TouchPhase.Began:
 
-                        touchTime = Time.time;
-                        beginTouch = touch;
+                    touchTime = Time.time;
+                    beginTouch = touch;
                         
-                        cameraObject.GetComponent<DragCamera>().setDragOriginTouch(touch);
+                    cameraObject.GetComponent<DragCamera>().setDragOriginTouch(touch);
                         
-                        break;
-					case TouchPhase.Ended:
-						// This checks if touch was a TAP
-						if (Time.time - touchTime <= tapTime && !isMoved)
-						{
-							Debug.Log("tap");
+                    break;
+
+				case TouchPhase.Ended:
+					// This checks if touch was a TAP
+					if (Time.time - touchTime <= tapTime && !isMoved)
+					{
+						Debug.Log("tap");
                             
 
-                            // If we didn't click menu, check for tile click
-                            if (!checkForMenuTap())
-                            {
-                                checkForTileTap();
-                                character.GetComponent<CharacterMovement>().setFlagTrue();
-                            }
+                        // If we didn't click menu, check for tile click
+                        if (!checkForMenuTap())
+                        {
+                            checkForTileTap();
+                            character.GetComponent<CharacterMovement>().setFlagTrue();
+                        }
                                 
 
-						}
-						
-                        isMoved = false;
-						break;
-					case TouchPhase.Moved:
-                        if (Time.time - touchTime >= moveTime)
-                        {
-                            isMoved = true;
-                            //Check for camera slide
-                            cameraObject.GetComponent<DragCamera>().setCurrentTouch(touch);
-                            cameraObject.GetComponent<DragCamera>().slideCamera();
-                            cameraObject.GetComponent<DragCamera>().setDragOriginTouch(touch);
-
-                        }
-                        break;
-
 					}
+						
+                    isMoved = false;
+					break;
+				case TouchPhase.Moved:
+                    if (Time.time - touchTime >= moveTime)
+                    {
+                        isMoved = true;
+                        //Check for camera slide
+                        cameraObject.GetComponent<DragCamera>().setCurrentTouch(touch);
+                        cameraObject.GetComponent<DragCamera>().slideCamera();
+                        cameraObject.GetComponent<DragCamera>().setDragOriginTouch(touch);
+
+                    }
+                    break;
+
 				}
 			}
+		}
 	}
 	
     // Raycast for tiles
