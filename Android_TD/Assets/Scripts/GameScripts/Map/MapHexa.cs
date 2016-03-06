@@ -149,7 +149,7 @@ public class MapHexa : MonoBehaviour {
 			setTexture (1);
 			break;
 		case HexType.Mountain:
-			//setTexture (2);
+			setTexture (2);
 			break;
 		case HexType.End:
 			setTexture (3);

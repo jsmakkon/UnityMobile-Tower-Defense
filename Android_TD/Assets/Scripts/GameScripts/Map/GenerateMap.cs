@@ -13,14 +13,6 @@ public class GenerateMap : MonoBehaviour {
 
 	private MapData mapData;
     
-
-    public int numOfRoadStarts = 3;
-
-	private float wDist = 1.73205f;
-
-	private float rowH = -1.5f;
-	private float rowOffset = 0.866025f;
-
 	// Road generator stuff
 	public int roadMinLength = 20;
 
@@ -32,36 +24,55 @@ public class GenerateMap : MonoBehaviour {
 		
 	}
     // Call this to (re)generate map, nothing else is needed here
-    public void generateMap(int seed = -1)
+    public void generateMap(int seed = -1, int numOfRoads = 3, int amountOfMountains = 3)
     {
         if (seed == -1)
+            //Random.seed = 468466;
             setRandomSeed();
         else
             Random.seed = seed;
 
         // Reset for new map
-        rowIDs = 0; 
+        //rowIDs = 0; 
         // Generate hexas to map
-        generateMapBlocks();
+        // generateMapBlocks();
         // Create end of the road (players base)
-        createRoadEnd();
-        // Generate roads
-        while (generateRoads() == 0)
+        //createRoadEnd();
+        
+        bool success = false;
+        while (!success)
         {
-            setRandomSeed();
             mapData.deleteRoads();
             rowIDs = 0;
             // Recreate everything on fail
             generateMapBlocks();
             createRoadEnd();
+            // Generate roads
+            if (generateRoads(numOfRoads) == 0)
+            {
+                setRandomSeed();
+                continue;
+            }
+            // Roads generated, generate mountains
+            if (generateMountains(amountOfMountains) == 0)
+            {
+                setRandomSeed();
+                continue;
+            }
+            success = true;
         }
+        
+
     }
 
     // Generates hexagons to map
 	private void generateMapBlocks() {
 		Vector3 position;
 		bool offsetRowFlag;
-		List<GameObject> rowList= gameController.GetComponent<MapData>().getRowList();
+        float rowH = Constants.rowHeight;
+        float wDist = Constants.widthDistance;
+        float rowOffset = Constants.rowOffset;
+        List<GameObject> rowList= gameController.GetComponent<MapData>().getRowList();
 
 		// Clear if we are recreating map
 		rowList.Clear ();
@@ -102,12 +113,12 @@ public class GenerateMap : MonoBehaviour {
 
 
 
-    private int generateRoads() {
+    private int generateRoads(int numOfRoads = 3) {
         //Roads.RoadEnd roadEnd = mapData.getRoadEnd();
 
         // Generate road starting hexas
         // TODO: get number of roads from playerprefs
-        int numOfRoads = 3;
+        
         List<MapHexa.Coordinate> startCoords = getStartPointCoords(numOfRoads);
 
         // Set starting hexa type as a Road
@@ -256,6 +267,80 @@ public class GenerateMap : MonoBehaviour {
 		// If we fail at this point, clean made block and return to previous block
 		return 0;
 	}
+
+    private int expandEnough = 3;
+    private int expandDirs = 2;
+    private int minSizeOfMountain = 5;
+
+    private int generateMountains(int amountOf = 3)
+    {
+        int counter = 0;
+        for (int i = 0; i < amountOf; i++)
+        {
+            if (counter > 10) return 0;
+            List<GameObject> gatheredHexas = new List<GameObject>();
+            //First, pick random spot to generate mountain to
+            GameObject hexa = pickMountainStart();
+            gatheredHexas.Add(hexa);
+            MapHexa mapHex = hexa.GetComponent<MapHexa>();
+            // Start expanding to every direction
+            List<MapHexa.HexDir> directions = initDirections();
+            for (int a = 0; a < directions.Count; a++)
+            {
+                if (getNeighbourHexType(hexa, directions[a]) == MapHexa.HexType.Grass)
+                    gatheredHexas.Add(mapHex.getNeighbour(directions[a]));
+            }
+            if (gatheredHexas.Count < expandEnough)
+            {
+                counter++;
+                // Try again if we couldn't expand enough
+                i--;
+                continue;
+            }
+            // Expand to 2 random direction a bit further TODO:
+            /*for (int a = 0; a < expandDirs; a++)
+            {
+                gatheredHexas
+            }*/
+            for (int a = 0;a < gatheredHexas.Count; a++)
+            {
+                gatheredHexas[a].GetComponent<MapHexa>().setType(MapHexa.HexType.Mountain);
+            }
+            counter = 0;
+        }
+        
+
+        return 1;
+    }
+
+    private MapHexa.HexType getNeighbourHexType(GameObject hex, MapHexa.HexDir dir)
+    {
+        return hex.GetComponent<MapHexa>().getNeighbour(dir).GetComponent<MapHexa>().getHexType();
+    }
+
+    // TODO: Optimize by tracking previous misses
+    private GameObject pickMountainStart()
+    {
+        int safeCounter = 0;
+        int col = Random.Range(1, MapData.columns-1);
+        int row = Random.Range(1, MapData.rows-1);
+        GameObject hexa = mapData.getHexa(row,col);
+        while (hexa.GetComponent<MapHexa>().getHexType() != MapHexa.HexType.Grass)
+        {
+            col = Random.Range(1, MapData.columns-1);
+            row = Random.Range(1, MapData.rows-1);
+            hexa = mapData.getHexa(row, col);
+            safeCounter++;
+            if (safeCounter > 10000)
+            {
+                Debug.LogError("Infinite loop at pickMountainStart()");
+                return null;
+            }
+                
+        }
+        return hexa;
+    }
+
 	// Checks if there is road with some other id than the given one and returns that hexa.
 	private MapHexa isOtherRoadNearby(MapHexa hexa, int myRoadId) {
 		List <MapHexa.HexDir> directions = initDirections ();
@@ -279,6 +364,13 @@ public class GenerateMap : MonoBehaviour {
     private bool isRoadTooShort(Roads.Road road)
     {
         Roads.Road.RoadBlock nextBlock = road.roadBlocks[road.roadBlocks.Count - 1].getNextRoadBlock();
+        if (nextBlock == null)
+        {
+            if (road.roadBlocks.Count < roadMinLength)
+                return true;
+            else
+                return false;
+        }
         if (road.roadBlocks.Count + mapData.getRoads().getDistanceToEndOfRoad(nextBlock.getRoadId(), nextBlock.getBlockId()) < roadMinLength)
         {
             return true;

@@ -30,15 +30,11 @@ public class MapData : MonoBehaviour {
     // Starts map generation
     void Start()
     {
-        string seed = PlayerPrefs.GetString("GameSeed");
-        if (seed != "")
-        {
-            map.GetComponent<GenerateMap>().generateMap(int.Parse(seed));
-        }
+        GameObject datacarrier = GameObject.Find("DataCarrier");
+        if (datacarrier != null)
+            map.GetComponent<GenerateMap>().generateMap(datacarrier.GetComponent<DataCarrierScript>().seed);
         else
-        {
             map.GetComponent<GenerateMap>().generateMap();
-        }
     }
 
 	public List<GameObject> getRowList() {
@@ -76,11 +72,11 @@ public class MapData : MonoBehaviour {
 		return null;
 	}
 
-    public GameObject getHexa(int row, int hexa)
+    public GameObject getHexa(int row, int col)
     {
         MapHexa.Coordinate coords;
         coords.rowId = row;
-        coords.hexaId = hexa;
+        coords.hexaId = col;
         return getHexa(coords);
     }
 

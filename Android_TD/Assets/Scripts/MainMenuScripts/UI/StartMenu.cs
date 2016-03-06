@@ -10,7 +10,7 @@ public class StartMenu : MonoBehaviour {
         int seedInt = 0;
         if (int.TryParse(seed, out seedInt))
         {
-            PlayerPrefs.SetString("GameSeed", seed);
+            GameObject.Find("DataCarrier").GetComponent<DataCarrierScript>().seed = int.Parse(seed);
         }
 		SceneManager.LoadScene ("GameScene");
 	}
