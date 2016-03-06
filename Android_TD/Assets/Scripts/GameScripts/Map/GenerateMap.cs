@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-/* Road map generating algorithm. */
+/* Road map generating algorithm. TODO: Split to different files for clarity */
 
 public class GenerateMap : MonoBehaviour {
 
@@ -20,24 +20,17 @@ public class GenerateMap : MonoBehaviour {
 		mapData = gameController.GetComponent<MapData> ();
 	}
 	void Start () {
-        //generateMap();
 		
 	}
     // Call this to (re)generate map, nothing else is needed here
-    public void generateMap(int seed = -1, int numOfRoads = 3, int amountOfMountains = 3)
+    public void generateMap(int seed = -1, int numOfRoads = 3, int amountOfMountains = 6)
     {
         if (seed == -1)
             //Random.seed = 468466;
             setRandomSeed();
         else
             Random.seed = seed;
-
-        // Reset for new map
-        //rowIDs = 0; 
-        // Generate hexas to map
-        // generateMapBlocks();
-        // Create end of the road (players base)
-        //createRoadEnd();
+        
         
         bool success = false;
         while (!success)
@@ -65,8 +58,10 @@ public class GenerateMap : MonoBehaviour {
 
     }
 
+    // ------------------------- MAP BLOCKS GENERATION ALGORITHMS -----------------------------
+
     // Generates hexagons to map
-	private void generateMapBlocks() {
+    private void generateMapBlocks() {
 		Vector3 position;
 		bool offsetRowFlag;
         float rowH = Constants.rowHeight;
@@ -111,7 +106,7 @@ public class GenerateMap : MonoBehaviour {
 		}
 	}
 
-
+    // ------------------------- ROAD GENERATION ALGORITHMS -----------------------------
 
     private int generateRoads(int numOfRoads = 3) {
         //Roads.RoadEnd roadEnd = mapData.getRoadEnd();
@@ -268,16 +263,19 @@ public class GenerateMap : MonoBehaviour {
 		return 0;
 	}
 
-    private int expandEnough = 3;
-    private int expandDirs = 2;
-    private int minSizeOfMountain = 5;
+    // ------------------------- MOUNTAIN GENERATION ALGORITHMS -----------------------------
+
+    public int expandEnough = 3;
+    public int expandDirs = 2;
+    public int expandTimes = 3;
+    public int minSizeOfMountain = 5;
 
     private int generateMountains(int amountOf = 3)
     {
-        int counter = 0;
+        int counter = 0; // Safety counter
         for (int i = 0; i < amountOf; i++)
         {
-            if (counter > 10) return 0;
+            if (counter > 50) return 0;
             List<GameObject> gatheredHexas = new List<GameObject>();
             //First, pick random spot to generate mountain to
             GameObject hexa = pickMountainStart();
@@ -285,23 +283,36 @@ public class GenerateMap : MonoBehaviour {
             MapHexa mapHex = hexa.GetComponent<MapHexa>();
             // Start expanding to every direction
             List<MapHexa.HexDir> directions = initDirections();
-            for (int a = 0; a < directions.Count; a++)
+            int initDirCount = directions.Count;
+            for (int a = 2; a < initDirCount; a++)
             {
-                if (getNeighbourHexType(hexa, directions[a]) == MapHexa.HexType.Grass)
-                    gatheredHexas.Add(mapHex.getNeighbour(directions[a]));
+                MapHexa.HexDir direction = directions[Random.Range(0, directions.Count)];
+                directions.Remove(direction);
+                if (getNeighbourHexType(hexa, direction) == MapHexa.HexType.Grass)
+                    gatheredHexas.Add(mapHex.getNeighbour(direction));
             }
             if (gatheredHexas.Count < expandEnough)
             {
-                counter++;
                 // Try again if we couldn't expand enough
+                counter++;
                 i--;
                 continue;
             }
-            // Expand to 2 random direction a bit further TODO:
-            /*for (int a = 0; a < expandDirs; a++)
+            // Expand to X random direction a bit further
+            List<GameObject> expandChoises = getRandomObjects(gatheredHexas, expandDirs);
+            directions = initDirections();
+            for (int a = 0; a < expandChoises.Count; a++)
             {
-                gatheredHexas
-            }*/
+                // Expand X times to a random nearby spot
+                for (int b = 0; b < expandTimes; b++)
+                {
+                    GameObject expandHexa = expandChoises[a].GetComponent<MapHexa>().getNeighbour(directions[Random.Range(0, directions.Count)]);
+                    if (!gatheredHexas.Contains(expandHexa) && expandHexa.GetComponent<MapHexa>().getHexType() == MapHexa.HexType.Grass)
+                        gatheredHexas.Add(expandHexa);
+                }
+                
+            }
+
             for (int a = 0;a < gatheredHexas.Count; a++)
             {
                 gatheredHexas[a].GetComponent<MapHexa>().setType(MapHexa.HexType.Mountain);
@@ -313,6 +324,8 @@ public class GenerateMap : MonoBehaviour {
         return 1;
     }
 
+    // ------------------------- HELPER FUNCTIONS -----------------------------
+
     private MapHexa.HexType getNeighbourHexType(GameObject hex, MapHexa.HexDir dir)
     {
         return hex.GetComponent<MapHexa>().getNeighbour(dir).GetComponent<MapHexa>().getHexType();
@@ -321,7 +334,7 @@ public class GenerateMap : MonoBehaviour {
     // TODO: Optimize by tracking previous misses
     private GameObject pickMountainStart()
     {
-        int safeCounter = 0;
+        int safetyCounter = 0;
         int col = Random.Range(1, MapData.columns-1);
         int row = Random.Range(1, MapData.rows-1);
         GameObject hexa = mapData.getHexa(row,col);
@@ -330,8 +343,8 @@ public class GenerateMap : MonoBehaviour {
             col = Random.Range(1, MapData.columns-1);
             row = Random.Range(1, MapData.rows-1);
             hexa = mapData.getHexa(row, col);
-            safeCounter++;
-            if (safeCounter > 10000)
+            safetyCounter++;
+            if (safetyCounter > 10000)
             {
                 Debug.LogError("Infinite loop at pickMountainStart()");
                 return null;
@@ -339,6 +352,31 @@ public class GenerateMap : MonoBehaviour {
                 
         }
         return hexa;
+    }
+
+    // Returns list of random (different) objects chosen from given list
+    private List<GameObject> getRandomObjects(List<GameObject> objects, int numOfObjects)
+    {
+        List<GameObject> retList = new List<GameObject>();
+        if (objects.Count <= numOfObjects)
+        {
+            for (int i = 0; i < objects.Count; i++)
+                retList.Add(objects[i]);
+        }
+             
+        int chosen = 0;
+        while (chosen < numOfObjects)
+        {
+            GameObject choice = objects[Random.Range(0, objects.Count)];
+            for (int a = 0; a < retList.Count; a++)
+            {
+                if (retList.Contains(choice))
+                    continue;
+            }
+            retList.Add(choice);
+            chosen++;
+        }
+        return retList;
     }
 
 	// Checks if there is road with some other id than the given one and returns that hexa.
